@@ -1,0 +1,75 @@
+<div class="flex justify-content-between align-items-center m-4">
+  <h2 class="m-0">Properties</h2>
+
+  <p-button
+    label="Add new"
+    icon="pi pi-plus"
+    (onClick)="create()">
+  </p-button>
+</div>
+
+<!-- FILTERS -->
+<div class="flex gap-3 m-4">
+  <input
+    pInputText
+    placeholder="Search by name"
+    [value]="nameFilter()"
+    (input)="nameFilter.set($any($event.target).value)"
+  />
+
+  <p-select
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Status"
+    showClear
+    class="w-12rem"
+    (onChange)="statusFilter.set($event.value)"
+  />
+</div>
+
+<!-- TABLE -->
+<p-table
+  [value]="filteredProperties()"
+  dataKey="id"
+  class="mx-4 my-4 p-datatable-hoverable-rows"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Name</th>
+      <th>Country</th>
+      <th>Status</th>
+      <th>Guests</th>
+      <th style="width: 4rem"></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-p>
+    <tr
+      class="cursor-pointer"
+      (click)="openDetails(p)"
+    >
+      <td>{{ p.name }}</td>
+      <td>{{ p.country }}</td>
+      <td>
+        <span
+          class="px-2 py-1 border-round text-sm"
+          [ngClass]="{
+            'bg-green-100 text-green-800': p.status === 'ACTIVE',
+            'bg-gray-200 text-gray-700': p.status === 'INACTIVE'
+          }">
+          {{ p.status }}
+        </span>
+      </td>
+      <td>{{ p.maxGuests }}</td>
+      <td class="text-right">
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          text
+          (onClick)="$event.stopPropagation(); delete(p.id)">
+        </p-button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
