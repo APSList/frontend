@@ -21,7 +21,8 @@ export class HeaderComponent implements AfterViewInit {
     { label: 'Properties', route: '/properties' },
     { label: 'Payments', route: '/payments' },
     { label: 'Customers', route: '/customers' },
-    { label: 'Users', route: '/users' }
+    { label: 'Users', route: '/users' },
+    { label: 'Dashboard customer', route: '/dashboard-customer' }
   ];
 
   activeIndex = 0;

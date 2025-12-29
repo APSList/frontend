@@ -19,7 +19,7 @@ import { TagModule } from 'primeng/tag';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class Dashboard {
   stats = {
     activeBookings: 18,
     upcomingArrivals: 6,

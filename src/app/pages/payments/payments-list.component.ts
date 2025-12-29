@@ -4,9 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-payments',
   standalone: true,
   imports: [],
-  templateUrl: './payments.component.html',
-  styleUrl: './payments.component.css',
+  templateUrl: './payments-list.component.html',
+  styleUrl: './payments-list.component.css',
 })
-export class PaymentsComponent {
+export class PaymentsList {
 
 }

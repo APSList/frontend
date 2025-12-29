@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PropertyForm } from './property-form';
+import { CustomersList } from './customers-list.component';
 
-describe('PropertyForm', () => {
-  let component: PropertyForm;
-  let fixture: ComponentFixture<PropertyForm>;
+describe('Customers', () => {
+  let component: CustomersList;
+  let fixture: ComponentFixture<CustomersList>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PropertyForm]
+      imports: [CustomersList]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PropertyForm);
+    fixture = TestBed.createComponent(CustomersList);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
