@@ -1,1 +1,330 @@
-<p>dashboard-customer works!</p>
+
+<div class="dashboard-customer surface-ground">
+
+  <!-- Filters (Airbnb-ish bar) -->
+  <div class="sticky top-0 z-5 surface-ground" style="backdrop-filter: blur(10px);">
+    <div class="mx-2 mt-2">
+      <div class="surface-card border-round-2xl shadow-1 p-2">
+        <div class="flex flex-column gap-2 md:flex-row md:align-items-center md:justify-content-between">
+
+          <!-- Left: title (optional) -->
+          <div class="px-2 py-1 hidden md:block">
+            <div class="text-lg font-semibold text-900">Explore</div>
+            <div class="text-600 text-sm">Swipe photos · Filter by dates</div>
+          </div>
+
+          <!-- Pills -->
+          <div class="flex flex-column gap-2 w-full md:flex-row md:align-items-center md:gap-2">
+            <!-- Search pill -->
+            <div class="surface-50 border-1 border-200 border-round-2xl px-3 py-2 flex align-items-center gap-2 w-full md:w-20rem">
+              <i class="pi pi-search text-600"></i>
+              <input
+                pInputText
+                class="w-full border-0 surface-50 p-0"
+                style="box-shadow:none;"
+                [ngModel]="q()"
+                (ngModelChange)="q.set($event)"
+                placeholder="Search stays, city, host" />
+              @if (q()?.length) {
+                <button type="button" class="p-link" (click)="q.set('')" aria-label="Clear search">
+                  <i class="pi pi-times text-600"></i>
+                </button>
+              }
+            </div>
+
+            <!-- Date pill -->
+            <div class="surface-50 border-1 border-200 border-round-2xl px-3 py-2 flex align-items-center gap-2 w-full md:w-auto">
+              <i class="pi pi-calendar text-600"></i>
+              <div class="flex flex-column min-w-0 w-full">
+                <span class="text-900 text-sm font-semibold">Dates</span>
+                <span class="text-600 text-sm truncate">
+                  @if (range()[0] && range()[1]) {
+                    {{ range()[0] | date:'MMM d' }} – {{ range()[1] | date:'MMM d' }}
+                  } @else {
+                    Select date range
+                  }
+                </span>
+              </div>
+
+              <!-- Invisible but functional DatePicker (clickable area) -->
+              <div style="position: absolute; opacity: 0; pointer-events: auto;">
+                <p-datepicker
+                  selectionMode="range"
+                  [showIcon]="false"
+                  [readonlyInput]="true"
+                  [ngModel]="rangeModel"
+                  (ngModelChange)="rangeModel = $event">
+                </p-datepicker>
+              </div>
+
+              @if (range()[0] && range()[1]) {
+                <button type="button" class="p-link" (click)="range.set([null, null])" aria-label="Clear dates">
+                  <i class="pi pi-times text-600"></i>
+                </button>
+              }
+            </div>
+
+            <!-- Availability pill -->
+            <div class="surface-50 border-1 border-200 border-round-2xl px-3 py-2 flex align-items-center justify-content-between gap-3 w-full md:w-auto">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-600"></i>
+                <div class="flex flex-column">
+                  <span class="text-900 text-sm font-semibold">Availability</span>
+                  <span class="text-600 text-sm">
+                    @if (onlyAvailable()) { Only available } @else { All stays }
+                  </span>
+                </div>
+              </div>
+              <p-toggleswitch
+                [ngModel]="onlyAvailable()"
+                (ngModelChange)="onlyAvailable.set($event)">
+              </p-toggleswitch>
+            </div>
+
+            <!-- Clear all -->
+            <div class="flex gap-2 w-full md:w-auto">
+              <p-button
+                class="w-full md:w-auto"
+                label="Clear"
+                icon="pi pi-filter-slash"
+                rounded
+                severity="secondary"
+                [disabled]="!q()?.length && !(range()[0] && range()[1]) && !onlyAvailable()"
+                (onClick)="q.set(''); range.set([null, null]); onlyAvailable.set(false)">
+              </p-button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="px-2 pb-5 mt-3">
+    <div class="grid">
+
+      @for (p of filteredProperties(); track p.id) {
+        <div class="col-12 sm:col-6 lg:col-4 xl:col-3">
+
+          <!-- Clean Airbnb-like tile -->
+          <div class="surface-card border-round-2xl overflow-hidden"
+               style="box-shadow: 0 1px 12px rgba(0,0,0,.06);">
+
+            <!-- Media -->
+            <div style="position: relative;">
+              <p-galleria
+                class="border-round-2xl overflow-hidden"
+                [value]="coverUrls(p)"
+                [circular]="true"
+                [showIndicators]="true"
+                [showItemNavigators]="true"
+                [showThumbnails]="false"
+                [activeIndex]="cardIndex(p.id)"
+                (activeIndexChange)="setCardIndex(p.id, $event)">
+
+                <ng-template #item let-image>
+                  <div style="position: relative; height: 15.25rem;">
+                    <img
+                      [src]="image"
+                      style="width:100%; height:100%; object-fit: cover;"
+                      loading="lazy"
+                      decoding="async" />
+
+                    <!-- overlays -->
+                    <div style="position:absolute; inset:0; pointer-events:none;
+                                background: linear-gradient(to bottom, rgba(0,0,0,.22), rgba(0,0,0,0) 42%),
+                                            linear-gradient(to top, rgba(0,0,0,.25), rgba(0,0,0,0) 42%);">
+                    </div>
+
+                    <!-- top left: availability -->
+                    @let start = range()[0];
+                    @let end = range()[1];
+                    @if (start && end) {
+                      @let tag = availabilityTag(p.id, start, end);
+                      <div style="position:absolute; left:.75rem; top:.75rem;">
+                        <span
+                          class="border-round-xl px-3 py-2 text-sm font-semibold"
+                          style="backdrop-filter: blur(10px); background: rgba(255,255,255,.92); color: #111827;">
+                          {{ tag.label }}
+                        </span>
+                      </div>
+                    }
+
+                    <!-- bottom right: count -->
+                    <div style="position:absolute; right:.75rem; bottom:.75rem;">
+                      <span class="border-round-xl px-3 py-2 text-sm"
+                            style="backdrop-filter: blur(10px); background: rgba(0,0,0,.35); color: white;">
+                        {{ cardIndex(p.id) + 1 }} / {{ coverUrls(p).length }}
+                      </span>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-galleria>
+            </div>
+
+            <!-- Meta -->
+            <div class="p-3">
+              <div class="flex align-items-start justify-content-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-900 font-semibold text-base truncate">{{ p.name }}</div>
+                  <div class="text-600 text-sm truncate">{{ p.address ?? p.country ?? '' }}</div>
+                </div>
+
+                <div class="flex align-items-center gap-2 text-900">
+                  <i class="pi pi-star-fill"></i>
+                  <span class="font-semibold">{{ ratingFor(p) | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="text-700 text-sm mt-2">
+                Hosted by <span class="text-900 font-semibold">{{ hostNameFor(p) }}</span>
+              </div>
+
+              <div class="flex align-items-center justify-content-between mt-3">
+                <div class="text-900">
+                  <span class="font-semibold">{{ displayPrice(p) }}</span>
+                </div>
+
+                <p-button
+                  label="Details"
+                  icon="pi pi-angle-right"
+                  iconPos="right"
+                  rounded
+                  severity="secondary"
+                  (onClick)="openDetails(p)">
+                </p-button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+      @if (filteredProperties().length === 0) {
+        <div class="col-12">
+          <div class="surface-card border-round-2xl p-5 text-center" style="box-shadow: 0 1px 12px rgba(0,0,0,.06);">
+            <i class="pi pi-search text-300" style="font-size: 2.5rem;"></i>
+            <div class="text-xl font-semibold text-900 mt-3">No matches</div>
+            <div class="text-600 mt-1">Try adjusting filters or clearing them.</div>
+            <p-button class="mt-4" label="Clear filters" rounded severity="secondary"
+                      (onClick)="q.set(''); range.set([null, null]); onlyAvailable.set(false)">
+            </p-button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Details dialog (kept clean) -->
+  <p-dialog
+    [modal]="true"
+    [dismissableMask]="true"
+    [visible]="detailsOpen()"
+    [style]="{ width: 'min(980px, 96vw)' }"
+    (onHide)="closeDetails()">
+
+    <ng-template pTemplate="header">
+      @if (selectedProperty(); as sp) {
+        <div class="flex flex-column gap-1">
+          <div class="text-lg font-semibold text-900 truncate">{{ sp.name }}</div>
+          <div class="text-600 text-sm truncate">
+            {{ sp.address ?? sp.country ?? '' }} · Hosted by <span class="font-semibold">{{ selectedHost() }}</span>
+          </div>
+        </div>
+      } @else {
+        <div class="text-lg font-semibold text-900">Details</div>
+      }
+    </ng-template>
+
+    @if (selectedProperty(); as sp) {
+      <div class="flex flex-column gap-3">
+
+        <div class="border-round-2xl overflow-hidden" style="box-shadow: 0 1px 12px rgba(0,0,0,.06);">
+          <p-galleria
+            [value]="coverUrls(sp)"
+            [circular]="true"
+            [showItemNavigators]="true"
+            [showIndicators]="true"
+            [showThumbnails]="false">
+            <ng-template #item let-image>
+              <div style="height: 20rem; position: relative;">
+                <img [src]="image" style="width:100%; height:100%; object-fit: cover;" />
+              </div>
+            </ng-template>
+          </p-galleria>
+        </div>
+
+        <div class="surface-card border-round-2xl p-3" style="box-shadow: 0 1px 12px rgba(0,0,0,.06);">
+          <div class="flex flex-column gap-2">
+            <div class="flex align-items-center justify-content-between gap-3">
+              <div class="text-900 font-semibold">Check availability</div>
+              <div class="flex align-items-center gap-2 text-900">
+                <i class="pi pi-star-fill"></i>
+                <span class="font-semibold">{{ ratingFor(sp) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="flex flex-column md:flex-row md:align-items-center gap-2">
+              <p-datepicker
+                selectionMode="range"
+                [showIcon]="true"
+                [readonlyInput]="true"
+                placeholder="Select dates"
+                [ngModel]="detailsRangeModel"
+                (ngModelChange)="detailsRangeModel = $event"
+                [style]="{ width: 'min(380px, 100%)' }">
+              </p-datepicker>
+
+              @let a = detailsRange()[0];
+              @let b = detailsRange()[1];
+
+              @if (a && b) {
+                @let tag = availabilityTag(sp.id, a, b);
+                <span class="surface-50 border-1 border-200 border-round-xl px-3 py-2 text-sm font-semibold text-900">
+                  {{ tag.label }}
+                </span>
+
+                <p-button
+                  class="md:ml-auto"
+                  label="Show only available"
+                  icon="pi pi-filter"
+                  rounded
+                  severity="success"
+                  (onClick)="showOnlyAvailableFromDetails()">
+                </p-button>
+              } @else {
+                <span class="text-600 text-sm">Select a date range to see availability.</span>
+              }
+            </div>
+
+            <p-divider></p-divider>
+
+            <div class="text-700">
+              <span class="font-semibold">Booked ranges (mock)</span>
+            </div>
+
+            @if (selectedBookings().length === 0) {
+              <div class="text-600">No booked dates in this mock.</div>
+            } @else {
+              <div class="flex flex-column gap-2">
+                @for (b of selectedBookings(); track b.from + b.to) {
+                  <div class="surface-50 border-1 border-200 border-round-xl p-2 flex align-items-center justify-content-between">
+                    <span class="text-900">{{ b.from }} → {{ b.to }}</span>
+                    <span class="border-round-xl px-3 py-1 text-sm font-semibold"
+                          style="background: rgba(239,68,68,.12); color: rgb(185,28,28);">
+                      Booked
+                    </span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+  </p-dialog>
+
+</div>
