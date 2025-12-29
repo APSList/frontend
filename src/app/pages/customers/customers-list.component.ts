@@ -4,9 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-customers',
   standalone: true,
   imports: [],
-  templateUrl: './customers.component.html',
-  styleUrl: './customers.component.css',
+  templateUrl: './customers-list.component.html',
+  styleUrl: './customers-list.component.css',
 })
-export class CustomersComponent {
+export class CustomersList {
 
 }

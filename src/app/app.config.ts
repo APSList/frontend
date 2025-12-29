@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {ApplicationConfig, inject, provideZoneChangeDetection} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -6,9 +6,15 @@ import {provideAnimationsAsync} from "@angular/platform-browser/animations/async
 import {providePrimeNG} from "primeng/config";
 import Aura from '@primeuix/themes/aura';
 import {MessageService} from "primeng/api";
+import {APOLLO_OPTIONS, provideApollo} from "apollo-angular";
+import {ApolloClientOptions, InMemoryCache} from "@apollo/client";
+import {HttpLink} from "apollo-angular/http";
+import {environment} from "../environments/environment.development";
+import {provideHttpClient} from "@angular/common/http";
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideHttpClient(),
     providePrimeNG({
       theme: {
         preset: Aura,
@@ -24,8 +30,17 @@ export const appConfig: ApplicationConfig = {
     }),
     provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
     provideAnimationsAsync(), //Legacy
-    MessageService
+    MessageService,
+    provideApollo(() => {
+      const httpLink = inject(HttpLink);
 
+      return {
+        link: httpLink.create({
+          uri: environment.graphqlUrl, // ali environment.graphqlUrl
+        }),
+        cache: new InMemoryCache(),
+      };
+    }),
   ]
 
 };

@@ -5,6 +5,7 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './property-form.html',
   styleUrl: './property-form.css',
+  standalone: true
 })
 export class PropertyForm {
 

@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import {BookingsComponent} from "./pages/bookings/bookings";
-import {PaymentsComponent} from "./pages/payments/payments.component";
-import {CustomersComponent} from "./pages/customers/customers.component";
-import {UsersComponent} from "./pages/users/users.component";
-import {DashboardCustomerComponent} from "./pages/dashboard-customer/dashboard-customer";
+import { Dashboard } from './pages/dashboard/dashboard.component';
+import {BookingsList} from "./pages/bookings/bookings";
+import {PaymentsList} from "./pages/payments/payments-list.component";
+import {CustomersList} from "./pages/customers/customers-list.component";
+import {UsersList} from "./pages/users/users-list.component";
+import {DashboardCustomer} from "./pages/dashboard-customer/dashboard-customer";
 import {PropertyList} from "./pages/properties/property-list/property-list";
 import {PropertyForm} from "./pages/properties/property-form/property-form";
 import {PropertyDetail} from "./pages/properties/property-detail/property-detail";
@@ -17,15 +17,15 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    component: DashboardComponent
+    component: Dashboard
   },
   {
     path: 'dashboard-customer',
-    component: DashboardCustomerComponent
+    component: DashboardCustomer
   },
   {
     path: 'bookings',
-    component: BookingsComponent
+    component: BookingsList
   },
   { path: 'properties', component: PropertyList },
   { path: 'properties/new', component: PropertyForm },
@@ -33,14 +33,14 @@ export const routes: Routes = [
   { path: 'properties/:id/edit', component: PropertyForm },
   {
     path: 'payments',
-    component: PaymentsComponent
+    component: PaymentsList
   },
   {
     path: 'customers',
-    component: CustomersComponent
+    component: CustomersList
   },
   {
     path: 'users',
-    component: UsersComponent
+    component: UsersList
   }
 ];
