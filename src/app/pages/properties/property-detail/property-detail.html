@@ -1,16 +1,22 @@
-<!-- PAGE BACKGROUND -->
 <div class="surface-50 min-h-screen">
-
-  <!-- CONTENT CONTAINER -->
   <div class="px-4 py-4" style="max-width:1280px;margin:0 auto;">
 
-    <!-- PAGE HEADER -->
-    <div class="flex justify-content-between align-items-center mb-4">
-      <h2 class="text-900 text-2xl font-semibold m-0">
-        Property details
-      </h2>
+    <!-- TOP BAR -->
+    <div class="flex align-items-center justify-content-between gap-3 mb-3">
+      <p-button
+        icon="pi pi-arrow-left"
+        label="Back"
+        severity="secondary"
+        text
+        (onClick)="back()">
+      </p-button>
 
-      <div class="flex gap-2">
+      <div class="flex align-items-center gap-3">
+        <p-tag
+          [value]="property().status"
+          [severity]="statusSeverity(property().status)">
+        </p-tag>
+
         @if (!editMode()) {
           <p-button
             icon="pi pi-pencil"
@@ -27,131 +33,196 @@
             label="Save"
             severity="primary"
             rounded
+            [disabled]="saving()"
             (onClick)="save()">
           </p-button>
+
+          <p-button
+            icon="pi pi-times"
+            label="Cancel"
+            severity="secondary"
+            rounded
+            (onClick)="toggleEdit()">
+          </p-button>
         }
-
-        <p-button
-          icon="pi pi-arrow-left"
-          text
-          rounded
-          (onClick)="back()">
-        </p-button>
       </div>
     </div>
 
-    <!-- MAIN GRID -->
-    <div class="grid">
-
-      <!-- GENERAL INFO CARD -->
-      <div class="col-12 lg:col-5">
-        <p-card class="p-4 h-full border-round-2xl shadow-1 surface-card">
-
-          <ng-template pTemplate="header">
-            <span class="font-semibold text-lg text-900">
-              General information
-            </span>
-          </ng-template>
-
-          <form [formGroup]="form" class="flex flex-column gap-4">
-
-            <div class="flex flex-column gap-1">
-              <label class="text-sm text-600">Name</label>
-              <input pInputText formControlName="name" />
-            </div>
-
-            <div class="flex flex-column gap-1">
-              <label class="text-sm text-600">Country</label>
-              <input pInputText formControlName="country" />
-            </div>
-
-            <div class="flex flex-column gap-1">
-              <label class="text-sm text-600">Description</label>
-              <textarea
-                pTextarea
-                rows="4"
-                autoResize
-                formControlName="description">
-              </textarea>
-            </div>
-
-            <div class="flex flex-column gap-1 max-w-12rem">
-              <label class="text-sm text-600">Max guests</label>
-              <p-inputNumber
-                formControlName="maxGuests"
-                showButtons
-                [min]="1"
-                [max]="20">
-              </p-inputNumber>
-            </div>
-
-          </form>
-        </p-card>
+    <!-- TITLE -->
+    <div class="mb-3">
+      <div class="text-900 text-3xl font-semibold">
+        @if (isNew()) { New property } @else { {{ property().name }} }
       </div>
 
-      <!-- PHOTOS CARD -->
-      <div class="col-12 lg:col-7">
-        <p-card class="p-4 h-full border-round-2xl shadow-1 surface-card">
+      <div class="text-600 mt-1 flex flex-wrap gap-3 align-items-center">
+        <span class="pi pi-map-marker"></span>
+        <span>{{ property().address }} · {{ property().country }}</span>
+        <span class="text-400">|</span>
+        <span class="pi pi-home"></span>
+        <span>{{ property().propertyType }}</span>
+      </div>
+    </div>
 
-          <ng-template pTemplate="header">
-            <div class="flex justify-content-between align-items-center">
-              <span class="font-semibold text-lg text-900">
-                Photos
-              </span>
+    <!-- PHOTOS -->
+    <property-image-uploader
+      [images]="property().images"
+      [editable]="editMode()"
+      [maxUploadBytes]="8000000">
+    </property-image-uploader>
 
-              @if (editMode()) {
-                <p-fileUpload
-                  mode="basic"
-                  accept="image/*"
-                  chooseLabel="Upload"
-                  chooseIcon="pi pi-upload"
-                  severity="secondary"
-                  [customUpload]="true"
-                  (uploadHandler)="addImage($event)">
-                </p-fileUpload>
-              }
-            </div>
-          </ng-template>
+    <!-- DETAILS FORM -->
+    <p-card class="p-4 border-round-2xl shadow-1 surface-card">
+      <ng-template pTemplate="header">
+        <span class="font-semibold text-lg text-900">Details</span>
+      </ng-template>
 
-          <p-galleria
-            [value]="property().images"
-            [numVisible]="5"
-            [showItemNavigators]="true"
-            [showIndicators]="false"
-            [circular]="true"
-            class="border-round-lg overflow-hidden">
+      <form [formGroup]="form" class="p-fluid grid mt-2">
 
-            <ng-template pTemplate="item" let-image let-i="index">
-              <div class="relative">
-                <img
-                  [src]="image"
-                  class="w-full h-20rem object-cover" />
+        <!-- Row 1 -->
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Name</label>
+            <input pInputText class="w-full" formControlName="name" />
+          </div>
+        </div>
 
-                @if (editMode()) {
-                  <p-button
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    rounded
-                    class="absolute top-0 right-0 m-2"
-                    (onClick)="removeImage(i)">
-                  </p-button>
-                }
+        <div class="col-12 md:col-4 lg:col-2">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Max guests</label>
+            <p-inputNumber
+              formControlName="maxGuests"
+              [min]="1"
+              [max]="50"
+              showButtons
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-4 lg:col-2">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Bedrooms</label>
+            <p-inputNumber
+              formControlName="bedrooms"
+              [min]="0"
+              [max]="30"
+              showButtons
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-4 lg:col-2">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Bathrooms</label>
+            <p-inputNumber
+              formControlName="bathrooms"
+              [min]="0"
+              [max]="30"
+              showButtons
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Country</label>
+            <input pInputText class="w-full" formControlName="country" />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Type</label>
+            <p-select
+              [options]="propertyTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              formControlName="propertyType">
+            </p-select>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Status</label>
+            <p-select
+              [options]="propertyStatusOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              formControlName="status">
+            </p-select>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Denny fee</label>
+            <p-inputNumber
+              formControlName="dennyFee"
+              mode="decimal"
+              [min]="0"
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Address</label>
+            <input pInputText class="w-full" formControlName="address" />
+          </div>
+        </div>
+
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Price / person / day</label>
+            <p-inputNumber
+              formControlName="pricePerPersonDay"
+              mode="decimal"
+              [min]="0"
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Description</label>
+            <textarea pTextarea rows="5" autoResize formControlName="description" class="w-full"></textarea>
+          </div>
+        </div>
+
+        <div class="col-12 lg:col-6">
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-1">
+                <label class="text-sm text-600">Updated at (read-only)</label>
+                <input pInputText class="w-full" formControlName="updatedAt" />
               </div>
-            </ng-template>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-1">
+                <label class="text-sm text-600">Updated by (read-only)</label>
+                <input pInputText class="w-full" formControlName="updatedBy" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <ng-template pTemplate="thumbnail" let-image>
-              <img
-                [src]="image"
-                class="w-full h-4rem object-cover border-round-sm" />
-            </ng-template>
-
-          </p-galleria>
-
-        </p-card>
-      </div>
-
-    </div>
+      </form>
+    </p-card>
 
   </div>
 </div>

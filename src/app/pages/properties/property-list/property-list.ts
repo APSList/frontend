@@ -77,7 +77,7 @@ export class PropertyList implements OnInit {
   error = signal<string | null>(null);
 
   nameFilter = signal('');
-  statusFilter = signal<string | null>(null);
+  statusFilter = signal<PropertyStatusEnum | null>(null);
   countryFilter = signal('');
 
   statusOptions = [
@@ -156,7 +156,7 @@ export class PropertyList implements OnInit {
     this.reload();
   }
 
-  onStatusChange(value: string | null) {
+  onStatusChange(value: PropertyStatusEnum | null) {
     this.statusFilter.set(value);
     this.reload();
   }

@@ -5,24 +5,28 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-import type { PropertyCreateRequestDTO, PropertyUpdateRequestDTO } from '../types/property.types';
+import type { Property, PropertyUpsertRequestDTO } from '../types/property.types';
 
 @Injectable({ providedIn: 'root' })
 export class PropertyRestService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/property`;
 
+  /** GET /property/{id} -> returns Property */
+  get(id: number): Observable<Property> {
+    return this.http.get<Property>(`${this.baseUrl}/${id}`);
+  }
+
   /** POST /property (multipart/form-data) -> returns propertyId */
-  create(dto: PropertyCreateRequestDTO): Observable<number> {
+  create(dto: PropertyUpsertRequestDTO): Observable<number> {
     const form = this.toFormData(dto);
     return this.http.post<number>(this.baseUrl, form);
   }
 
-  /** PUT /property/{id} (application/json) -> returns updatedId */
-  update(id: number, dto: PropertyUpdateRequestDTO): Observable<number> {
-    return this.http.put<number>(`${this.baseUrl}/${id}`, dto, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-    });
+  /** PUT /property/{id} (multipart/form-data) -> returns updatedId */
+  update(id: number, dto: PropertyUpsertRequestDTO): Observable<number> {
+    const form = this.toFormData(dto);
+    return this.http.put<number>(`${this.baseUrl}/${id}`, form);
   }
 
   /** DELETE /property/{id} */
@@ -30,10 +34,9 @@ export class PropertyRestService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  private toFormData(dto: PropertyCreateRequestDTO): FormData {
+  private toFormData(dto: PropertyUpsertRequestDTO): FormData {
     const form = new FormData();
 
-    // ✅ camelCase keys
     form.append('name', dto.name);
 
     if (dto.description != null) form.append('description', dto.description);
@@ -51,12 +54,18 @@ export class PropertyRestService {
 
     form.append('status', String(dto.status));
 
-    // Amenities: ponovi isti ključ
+    // Amenities (repeat key)
     if (dto.amenities?.length) {
       for (const a of dto.amenities) form.append('amenities', String(a));
     }
 
-    // Images: ponovi isti ključ
+    // ✅ Existing image paths to keep (repeat key)
+    // Če backend pričakuje drugo ime (npr. "existingImages"), samo spremeni tukaj.
+    if (dto.existingImagePaths?.length) {
+      for (const p of dto.existingImagePaths) form.append('existingImagePaths', p);
+    }
+
+    // ✅ New images (repeat key)
     if (dto.images?.length) {
       for (const file of dto.images) form.append('images', file, file.name);
     }

@@ -28,6 +28,26 @@ export type PropertyTypeEnum =
   | 'Loft'
   | 'MobileHome';
 
+// ✅ runtime lists (za PrimeNG options)
+export const AMENITY_TYPE_VALUES = ['Pool', 'Kitchen', 'Gym', 'Parking', 'Wifi'] as const;
+export const PROPERTY_STATUS_VALUES = ['Available', 'SoldOut', 'Closed'] as const;
+export const PROPERTY_TYPE_VALUES = [
+  'Apartment',
+  'House',
+  'Villa',
+  'Studio',
+  'Room',
+  'Cottage',
+  'Bungalow',
+  'Chalet',
+  'Duplex',
+  'Penthouse',
+  'Townhouse',
+  'Farmhouse',
+  'Loft',
+  'MobileHome'
+] as const;
+
 export interface PropertyImage {
   id: number;
   propertyId: number;
@@ -70,16 +90,15 @@ export interface Property {
 }
 
 /**
- * ✅ FE-friendly DTO (camelCase)
- * Če backend pričakuje PascalCase, naredi mapiranje v REST servisu pred pošiljanjem.
+ * ✅ Enoten DTO za CREATE + UPDATE
+ * - images = nove slike (File[])
+ * - existingImagePaths = obdrži te slike (backend jih po delete-u ponovno doda)
  */
-export interface PropertyCreateRequestDTO {
+export interface PropertyUpsertRequestDTO {
   name: string;
   description?: string | null;
 
-  // POZOR: backend ima "Adress" typo (če ga res zahteva), mapiraj v servisu.
   address?: string | null;
-
   country?: string | null;
 
   propertyType: PropertyTypeEnum;
@@ -93,8 +112,13 @@ export interface PropertyCreateRequestDTO {
 
   status: PropertyStatusEnum;
 
-  images?: File[] | null;
   amenities?: AmenityTypeEnum[] | null;
+
+  // ✅ nov seznam slik
+  existingImagePaths?: string[] | null; // storagePath-ji za “keep”
+  images?: File[] | null;               // nove slike
 }
 
-export type PropertyUpdateRequestDTO = Omit<PropertyCreateRequestDTO, 'images'>;
+// Če želiš ohraniti stara imena:
+export type PropertyCreateRequestDTO = PropertyUpsertRequestDTO;
+export type PropertyUpdateRequestDTO = PropertyUpsertRequestDTO;

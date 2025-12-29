@@ -6,7 +6,6 @@ import {CustomersList} from "./pages/customers/customers-list.component";
 import {UsersList} from "./pages/users/users-list.component";
 import {DashboardCustomer} from "./pages/dashboard-customer/dashboard-customer";
 import {PropertyList} from "./pages/properties/property-list/property-list";
-import {PropertyForm} from "./pages/properties/property-form/property-form";
 import {PropertyDetail} from "./pages/properties/property-detail/property-detail";
 
 export const routes: Routes = [
@@ -28,9 +27,8 @@ export const routes: Routes = [
     component: BookingsList
   },
   { path: 'properties', component: PropertyList },
-  { path: 'properties/new', component: PropertyForm },
+  { path: 'properties/new', component: PropertyDetail },
   { path: 'properties/:id', component: PropertyDetail },
-  { path: 'properties/:id/edit', component: PropertyForm },
   {
     path: 'payments',
     component: PaymentsList

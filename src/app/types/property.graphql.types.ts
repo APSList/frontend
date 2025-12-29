@@ -1,8 +1,7 @@
-// property.graphql.types.ts
+import {PropertyStatusEnum} from "./property.types";
 
 export type SortDirection = 'ASC' | 'DESC';
 
-// ---- Operation filterji (po shemi) ----
 
 export type StringOperationFilterInput = {
   eq?: string | null;
@@ -39,8 +38,6 @@ export type DateTimeOperationFilterInput = {
   nin?: (string | null)[] | null;
 };
 
-// Decimal v HotChocolate je običajno string v GraphQL JSON (da ne izgubi natančnosti).
-// Lahko uporabljaš tudi number, ampak priporočam string | number.
 export type DecimalOperationFilterInput = {
   eq?: string | number | null;
   neq?: string | number | null;
@@ -52,20 +49,12 @@ export type DecimalOperationFilterInput = {
   nin?: (string | number | null)[] | null;
 };
 
-// ---- Enumi ----
-export type PropertyStatusEnum = string;
-
-// HotChocolate je generiral poseben input za enum:
 export type PropertyStatusEnumOperationFilterInput = {
   eq?: PropertyStatusEnum | null;
   neq?: PropertyStatusEnum | null;
   in?: (PropertyStatusEnum | null)[] | null;
   nin?: (PropertyStatusEnum | null)[] | null;
 };
-
-// ---- Nested list filterji (iz sheme) ----
-// Imena so dolga, ampak točno taka so v shemi: ListFilterInputTypeOfXFilterInput
-// Najbolj praktično je modelirat generično obliko, ki jo HC tipično uporablja.
 
 export type ListFilterInput<TFilter> = {
   all?: TFilter | null;
@@ -79,13 +68,12 @@ export type PropertyAmenityFilterInput = {
   or?: PropertyAmenityFilterInput[] | null;
 
   propertyId?: IntOperationFilterInput | null;
-  amenityName?: StringOperationFilterInput | null; // če je enum, bo tu drugačen input v shemi
+  amenityName?: StringOperationFilterInput | null;
 };
 
 export type ListFilterInputTypeOfPropertyAmenityFilterInput =
   ListFilterInput<PropertyAmenityFilterInput>;
 
-// ✅ Glavni tip iz sheme:
 export type PropertyFilterInput = {
   and?: PropertyFilterInput[] | null;
   or?: PropertyFilterInput[] | null;
@@ -112,8 +100,6 @@ export type PropertyFilterInput = {
   propertyAmenities?: ListFilterInputTypeOfPropertyAmenityFilterInput | null;
 };
 
-// Sort input še nisi izpisal – ampak če je standard, bo podobno kot prej.
-// Če želiš, naredi isti introspection za PropertySortInput in ti ga napišem 1:1.
 export type PropertySortInput = {
   id?: SortDirection;
   name?: SortDirection;
