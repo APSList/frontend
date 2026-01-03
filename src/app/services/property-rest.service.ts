@@ -1,7 +1,7 @@
 // property-rest.service.ts (camelCase everywhere)
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -43,7 +43,8 @@ export class PropertyRestService {
     if (dto.address != null) form.append('address', dto.address);
     if (dto.country != null) form.append('country', dto.country);
 
-    form.append('propertyType', String(dto.propertyType));
+    // backend expects propertyTypeEnum
+    form.append('propertyTypeEnum', String(dto.propertyType));
 
     if (dto.maxGuests != null) form.append('maxGuests', String(dto.maxGuests));
     if (dto.bedrooms != null) form.append('bedrooms', String(dto.bedrooms));
@@ -54,18 +55,15 @@ export class PropertyRestService {
 
     form.append('status', String(dto.status));
 
-    // Amenities (repeat key)
+    // ✅ DO NOT mutate dto here. Just serialize what you were given.
     if (dto.amenities?.length) {
       for (const a of dto.amenities) form.append('amenities', String(a));
     }
 
-    // ✅ Existing image paths to keep (repeat key)
-    // Če backend pričakuje drugo ime (npr. "existingImages"), samo spremeni tukaj.
     if (dto.existingImagePaths?.length) {
       for (const p of dto.existingImagePaths) form.append('existingImagePaths', p);
     }
 
-    // ✅ New images (repeat key)
     if (dto.images?.length) {
       for (const file of dto.images) form.append('images', file, file.name);
     }

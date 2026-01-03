@@ -245,7 +245,7 @@ export class DashboardCustomer {
   }
 
   coverUrls(p: Property): string[] {
-    const imgs = (p.images ?? []) as PropertyImage[];
+    const imgs = (p.propertyImages ?? []) as PropertyImage[];
     const urls = imgs.map(i => i.storagePath).filter(Boolean);
     // fallback images if none
     if (!urls.length) return [

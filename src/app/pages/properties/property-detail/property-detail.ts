@@ -73,7 +73,7 @@ export class PropertyDetail {
     createdBy: null,
     updatedAt: new Date().toISOString(),
     updatedBy: null,
-    images: [],
+    propertyImages: [],
     propertyAmenities: []
   });
 
@@ -140,7 +140,7 @@ export class PropertyDetail {
         status: 'Available',
         createdAt: now,
         updatedAt: now,
-        images: []
+        propertyImages: []
       });
 
       this.form.patchValue({
