@@ -115,7 +115,7 @@ export class BookingList implements OnInit {
           // update bookings signal immutably
           this.bookings.update(list =>
             list.map(row =>
-              row.customerId === id ? { ...row, customerName: customer.fullName } : row
+              row.customerId === id ? { ...row, customerName: customer.full_name } : row
             )
           );
         },
