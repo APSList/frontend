@@ -44,17 +44,17 @@ export interface Reservation {
 
 // This matches ReservationRequest from Go
 export interface ReservationRequest {
-  organizationId: number;
-  propertyId: number;
-  customerId: number;
-  startDate: string; // ISO string
-  endDate: string;   // ISO string
-  totalPrice: number;
-  status: ReservationStatusEnum;
-  noOfGuests: number;
-  priceElements?: Record<string, unknown>;
-  guestData?: Record<string, unknown>;
-  additionalRequests?: Record<string, unknown>;
+  organization_id: number;
+  property_id: number;
+  customer_id: number;
+  start_date: string;
+  end_date: string;
+  total_price: number;
+  status: string;
+  no_of_guests: number;
+  price_elements?: any;
+  guest_data?: any;
+  additional_requests?: any;
 }
 
 // For status updates

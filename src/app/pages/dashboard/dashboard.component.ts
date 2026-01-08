@@ -34,6 +34,46 @@ export class Dashboard implements OnInit {
     ).length;
   });
 
+  upcomingArrivalsCount = computed(() => {
+    const now = new Date();
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(now.getMonth() + 1);
+
+    return this.bookings().filter(booking => {
+      // Use raw.startDate or raw.start_date based on your API
+      const startDateStr = booking.startDate || (booking as any).start_date;
+      if (!startDateStr) return false;
+
+      const checkInDate = new Date(startDateStr);
+      return checkInDate >= now && checkInDate <= oneMonthFromNow;
+    }).length;
+  });
+
+  monthlyRevenue = computed(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return this.bookings()
+      .filter(booking => {
+        // Use created_at (snake_case) or createdAt
+        const createdDateStr = (booking as any).created_at || booking.createdAt;
+        if (!createdDateStr) return false;
+
+        const createdDate = new Date(createdDateStr);
+        return (
+          createdDate.getMonth() === currentMonth &&
+          createdDate.getFullYear() === currentYear &&
+          booking.status !== 'CANCELLED' // Usually revenue ignores cancelled bookings
+        );
+      })
+      .reduce((sum, booking) => {
+        // Handle snake_case total_price or camelCase totalPrice
+        const price = (booking as any).total_price || booking.totalPrice || 0;
+        return sum + price;
+      }, 0);
+  });
+
   ngOnInit() {
     this.loadBookings();
   }
