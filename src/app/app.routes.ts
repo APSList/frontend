@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { Dashboard } from './pages/dashboard/dashboard.component';
 import { BookingList } from './pages/bookings/booking-list';
 import { PaymentsList } from './pages/payments/payments-list.component';
-import { CustomersList } from './pages/customers/customers-list.component';
+import { CustomerList } from './pages/customers/customers-list.component';
 import { UsersList } from './pages/users/users-list.component';
 import { DashboardCustomer } from './pages/dashboard-customer/dashboard-customer';
 import { PropertyList } from './pages/properties/property-list/property-list';
@@ -49,7 +49,7 @@ export const routes: Routes = [
   },
   {
     path: 'customers',
-    component: CustomersList,
+    component: CustomerList,
   },
   {
     path: 'users',
