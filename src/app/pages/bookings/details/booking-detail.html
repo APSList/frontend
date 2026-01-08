@@ -64,10 +64,19 @@
       <form [formGroup]="form" class="p-fluid grid mt-2">
 
         <!-- Row 1 -->
-        <div class="col-12 lg:col-6">
+        <div class="col-12 md:col-6">
           <div class="flex flex-column gap-1">
-            <label class="text-sm text-600">Property</label>
-            <input pInputText class="w-full" formControlName="name" />
+            <label class="text-sm text-600">Select Property</label>
+            <p-select
+              [options]="propertyOptions"
+              formControlName="propertyId"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select a Property"
+              [filter]="true"
+              [loading]="loadingProperties"
+              class="w-full">
+            </p-select>
           </div>
         </div>
 
@@ -88,9 +97,51 @@
         <div class="col-12 lg:col-6 lg:col-3">
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Customer</label>
-            <input pInputText class="w-full" formControlName="customer" />
+            <div class="p-inputgroup flex w-full">
+              <p-select
+                [options]="customerOptions"
+                formControlName="customerId"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select Customer"
+                [filter]="true"
+                [disabled]="!editMode()"
+                [style]="{'flex': '1 1 auto'}"
+                styleClass="w-full">
+              </p-select>
+
+              <p-button
+                icon="pi pi-plus"
+                severity="secondary"
+                [disabled]="!editMode()"
+                (onClick)="openNewCustomerDialog()">
+              </p-button>
+            </div>
           </div>
         </div>
+
+        <p-dialog
+          header="Create New Customer"
+          [(visible)]="showCustomerDialog"
+          [modal]="true"
+          [style]="{ width: '25rem' }">
+
+          <div class="flex flex-column gap-3 mt-2">
+            <div class="flex flex-column gap-1">
+              <label for="name">Full Name</label>
+              <input pInputText id="name" [(ngModel)]="newCustomer.fullName" autocomplete="off" />
+            </div>
+            <div class="flex flex-column gap-1">
+              <label for="email">Email</label>
+              <input pInputText id="email" [(ngModel)]="newCustomer.email" autocomplete="off" />
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <p-button label="Cancel" severity="secondary" (onClick)="showCustomerDialog = false" />
+            <p-button label="Save" [loading]="creatingCustomer" (onClick)="saveCustomer()" />
+          </ng-template>
+        </p-dialog>
 
         <div class="col-12 md:col-6 lg:col-3">
           <div class="flex flex-column gap-1">

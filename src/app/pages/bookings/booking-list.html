@@ -7,6 +7,7 @@
   <p-table [value]="rows()" [loading]="loading()">
     <ng-template pTemplate="header">
       <tr>
+        <th>Code</th>
         <th>Property</th>
         <th>Customer</th>
         <th>Check In</th>
@@ -18,6 +19,7 @@
 
     <ng-template pTemplate="body" let-b>
       <tr class="cursor-pointer" (click)="openDetails(b)">
+        <td>{{ b.id }}</td>
         <td>{{ b.propertyName }}</td>
         <td>{{ b.customerName }}</td>
         <td>{{ b.checkInDate | date:'mediumDate' }}</td>
