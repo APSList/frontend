@@ -23,8 +23,9 @@ FROM nginx:alpine
 # Kopiramo Nginx konfiguracijo
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Kopiramo zgrajene datoteke.
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/ui
+COPY --from=build /app/dist/frontend/browser/ /usr/share/nginx/html/ui/
+
 
 EXPOSE 80
 
