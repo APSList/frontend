@@ -15,7 +15,7 @@ RUN npm install
 COPY . .
 
 # Zgradimo aplikacijo za produkcijo
-RUN npm run build --configuration=production --base-href /ui/ --deploy-url /ui/
+RUN npm run build -- --configuration=production --base-href /ui/ --deploy-url /ui/
 
 # --- 2. Faza: Strežnik (Serve Stage) ---
 FROM nginx:alpine
