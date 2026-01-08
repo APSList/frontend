@@ -120,34 +120,11 @@
           </div>
         </div>
 
-        <p-dialog
-          header="Create New Customer"
-          [(visible)]="showCustomerDialog"
-          [modal]="true"
-          [style]="{ width: '25rem' }">
-
-          <div class="flex flex-column gap-3 mt-2">
-            <div class="flex flex-column gap-1">
-              <label for="name">Full Name</label>
-              <input pInputText id="name" [(ngModel)]="newCustomer.fullName" autocomplete="off" />
-            </div>
-            <div class="flex flex-column gap-1">
-              <label for="email">Email</label>
-              <input pInputText id="email" [(ngModel)]="newCustomer.email" autocomplete="off" />
-            </div>
-          </div>
-
-          <ng-template pTemplate="footer">
-            <p-button label="Cancel" severity="secondary" (onClick)="showCustomerDialog = false" />
-            <p-button label="Save" [loading]="creatingCustomer" (onClick)="saveCustomer()" />
-          </ng-template>
-        </p-dialog>
-
         <div class="col-12 md:col-6 lg:col-3">
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Check In</label>
             <p-datepicker
-              formControlName="checkInDate"
+              formControlName="startDate"
               [showIcon]="true"
               (onSelect)="updateCheckOutLimit($event)"
               iconDisplay="input"
@@ -161,7 +138,7 @@
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Check Out</label>
             <p-datepicker
-              formControlName="checkOutDate"
+              formControlName="endDate"
               [showIcon]="true"
               [minDate]="minCheckOutDate"
               iconDisplay="input"
@@ -171,20 +148,28 @@
           </div>
         </div>
 
-     <!--    &lt;!&ndash; Row 3 &ndash;&gt;
-        <div class="col-12 lg:col-6">
+        <!-- Row 3  -->
+        <div class="col-12 md:col-3">
           <div class="flex flex-column gap-1">
-            <label class="text-sm text-600">Address</label>
-            <input pInputText class="w-full" formControlName="address" />
+            <label class="text-sm text-600">No. of guests</label>
+            <p-inputNumber
+              formControlName="noOfGuests"
+              [min]="0"
+              [max]="30"
+              showButtons
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
           </div>
         </div>
 
-        <div class="col-12 lg:col-6">
+        <div class="col-12 md:col-3">
           <div class="flex flex-column gap-1">
-            <label class="text-sm text-600">Price / person / day</label>
+            <label class="text-sm text-600">Total price</label>
             <p-inputNumber
-              formControlName="pricePerPersonDay"
-              mode="decimal"
+              formControlName="totalPrice"
+              mode="currency"
+              currency="EUR"
               [min]="0"
               styleClass="w-full"
               inputStyleClass="w-full">
@@ -192,7 +177,25 @@
           </div>
         </div>
 
-        &lt;!&ndash; Row 4 &ndash;&gt;
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm font-bold text-900">Auto Calculation</label>
+            <p-inputNumber
+              formControlName="totalPrice"
+              mode="currency"
+              currency="EUR"
+              [readonly]="true"
+              styleClass="w-full"
+              inputStyleClass="w-full bg-blue-50 font-bold">
+            </p-inputNumber>
+            <small class="text-600">
+              Auto-calculated: (Days × Guests × Rate)
+            </small>
+          </div>
+        </div>
+
+
+        <!-- &ndash; Row 4 &ndash;&gt;
         <div class="col-12 lg:col-6">
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Description</label>
@@ -219,6 +222,28 @@
 
       </form>
     </p-card>
+    <p-dialog
+      header="Create New Customer"
+      [(visible)]="showCustomerDialog"
+      [modal]="true"
+      [style]="{ width: '25rem' }">
+
+      <div class="flex flex-column gap-3 mt-2">
+        <div class="flex flex-column gap-1">
+          <label for="name">Full Name</label>
+          <input pInputText id="name" [(ngModel)]="newCustomer.fullName" autocomplete="off" />
+        </div>
+        <div class="flex flex-column gap-1">
+          <label for="email">Email</label>
+          <input pInputText id="email" [(ngModel)]="newCustomer.email" autocomplete="off" />
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <p-button label="Cancel" severity="secondary" (onClick)="showCustomerDialog = false" />
+        <p-button label="Save" [loading]="creatingCustomer" (onClick)="saveCustomer()" />
+      </ng-template>
+    </p-dialog>
 
   </div>
 </div>

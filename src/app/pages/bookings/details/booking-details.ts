@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import {Component, signal, inject, OnInit, ChangeDetectorRef} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -19,6 +19,7 @@ import type {Reservation, ReservationRequest, ReservationStatusEnum} from '../..
 import {SelectModule} from "primeng/select";
 import {PropertyImageUploader} from "../../../components/property-image-uploader/property-image-uploader";
 import {DialogModule} from "primeng/dialog";
+import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 
 @Component({
   standalone: true,
@@ -47,6 +48,7 @@ export class BookingDetails implements OnInit {
   private bookingRest = inject(BookingRestService);
   private fb = inject(FormBuilder);
   private propertyService = inject(PropertyGraphqlService);
+  private cd : ChangeDetectorRef = inject(ChangeDetectorRef);
 
   booking = signal<Reservation | null>(null);
   loading = signal(true);
@@ -66,7 +68,7 @@ export class BookingDetails implements OnInit {
   // Form
   form: FormGroup;
 
-  propertyOptions: { label: string, value: string | number }[] = [];
+  propertyOptions: { label: string, value: string | number, price: number | null}[] = [];
   loadingProperties = false;
 
   readonly bookingStatusOptions = [
@@ -82,9 +84,9 @@ export class BookingDetails implements OnInit {
     this.form = this.fb.group({
       propertyId: [null, Validators.required],
       customerId: [null, Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      status: ['PENDING', Validators.required],
+      startDate: [null, Validators.required],
+      endDate: [null, Validators.required],
+      status: ['CREATED', Validators.required],
       totalPrice: [0, Validators.required],
       noOfGuests: [1, [Validators.required, Validators.min(1)]],
       priceElements: [{}],
@@ -97,6 +99,13 @@ export class BookingDetails implements OnInit {
   }
 
   ngOnInit() {
+    this.loadPropertyNames();
+    this.loadCustomers();
+
+    setTimeout(() => {
+      console.log("Forcing a refresh");
+    }, 2000);
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam || idParam === 'new') {
       this.isNew.set(true);
@@ -107,6 +116,31 @@ export class BookingDetails implements OnInit {
 
     const id = Number(idParam);
     if (!Number.isFinite(id)) return;
+
+    this.form.valueChanges.subscribe(() => {
+      this.calculateTotalPrice();
+    });
+
+    // Specifically watch propertyId to fetch its price
+    this.form.get('propertyId')?.valueChanges.subscribe(id => {
+      const selected = this.propertyOptions.find(p => p.value === id);
+      if (selected?.price) {
+        // Updating this will trigger the valueChanges listener above
+        this.form.patchValue({ pricePerPersonDay: selected.price });
+      }
+    });
+
+    this.form.valueChanges.pipe(
+      debounceTime(100), // Wait for user to stop typing/clicking
+      distinctUntilChanged((prev, curr) =>
+        prev.startDate === curr.startDate &&
+        prev.endDate === curr.endDate &&
+        prev.noOfGuests === curr.noOfGuests &&
+        prev.pricePerPersonDay === curr.pricePerPersonDay
+      )
+    ).subscribe(() => {
+      this.calculateTotalPrice();
+    });
 
     this.bookingRest.getById(id).subscribe({
       next: (res) => {
@@ -136,9 +170,6 @@ export class BookingDetails implements OnInit {
         this.loading.set(false);
       }
     });
-
-    this.loadPropertyNames();
-    this.loadCustomers();
   }
 
   loadPropertyNames() {
@@ -147,9 +178,11 @@ export class BookingDetails implements OnInit {
       next: (properties: any[]) => {
         this.propertyOptions = properties.map(p => ({
           label: p.name,   // The text shown to user
-          value: p.id      // The ID stored in the form
+          value: p.id,     // The ID stored in the form
+          price: p.pricePerPersonDay
         }));
         this.loadingProperties = false;
+        this.cd.detectChanges();
       },
       error: () => {
         this.loadingProperties = false;
@@ -192,6 +225,25 @@ export class BookingDetails implements OnInit {
     this.router.navigate(['/bookings']);
   }
 
+  calculateTotalPrice() {
+    const { startDate, endDate, noOfGuests, pricePerPersonDay } = this.form.getRawValue();
+
+    if (startDate && endDate && noOfGuests && pricePerPersonDay) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      // Calculate difference in days
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 0) {
+        const total = diffDays * noOfGuests * pricePerPersonDay;
+        // EmitEvent: false prevents the valueChanges listener from entering an infinite loop
+        this.form.patchValue({ totalPrice: total }, { emitEvent: false });
+      }
+    }
+  }
+
   toggleEdit() {
     this.editMode.set(!this.editMode());
     if (this.editMode()) this.form.enable();
@@ -199,7 +251,6 @@ export class BookingDetails implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (!this.form) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -207,35 +258,48 @@ export class BookingDetails implements OnInit {
 
     this.saving.set(true);
     try {
-      const dto: ReservationRequest = this.form.getRawValue();
+      const raw = this.form.getRawValue();
+
+      // Map form values to the ReservationRequest interface
+      const dto: ReservationRequest = {
+        organizationId: 1, // Set this based on your app's context
+        propertyId: Number(raw.propertyId),
+        customerId: Number(raw.customerId),
+        // Convert Date objects to ISO strings for the backend
+        startDate: new Date(raw.startDate).toISOString(),
+        endDate: new Date(raw.endDate).toISOString(),
+        totalPrice: raw.totalPrice || 0,
+        status: raw.status as ReservationStatusEnum,
+        noOfGuests: raw.noOfGuests || 1,
+        priceElements: {},
+        guestData: {},
+        additionalRequests: {}
+      };
 
       let saved: Reservation;
 
       if (this.isNew()) {
-        // create a new booking
         saved = await firstValueFrom(this.bookingRest.create(dto));
-        // set the returned booking to the signal
         this.booking.set(saved);
         this.isNew.set(false);
       } else {
-        // update existing booking
         const id = this.booking()?.id;
         if (!id) throw new Error("Booking ID missing for update");
         saved = await firstValueFrom(this.bookingRest.update(id, dto));
         this.booking.set(saved);
       }
 
-      // Refresh form values after save
-      this.form.patchValue({
-        ...saved,
-        updatedAt: saved.updatedAt,
-      });
-
+      // Patch back values from server (like updated timestamps)
+      this.form.patchValue(saved);
       this.form.disable();
       this.editMode.set(false);
 
+    } catch (error) {
+      console.error('Save failed:', error);
+      // You could add a Toast service message here
     } finally {
       this.saving.set(false);
+      this.cd.detectChanges();
     }
   }
 
