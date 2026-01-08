@@ -13,7 +13,7 @@ import {map} from "rxjs/operators";
 @Injectable({ providedIn: 'root' })
 export class BookingRestService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.bookingBaseUrl}/reservations/`;
+  private baseUrl = `${environment.bookingBaseUrl}/reservations`;
   private customerUrl = `${environment.bookingBaseUrl}/customer`;
 
   /** GET /reservations -> all reservations */
@@ -49,7 +49,7 @@ export class BookingRestService {
 
   /** POST /reservations -> create a new reservation */
   create(dto: ReservationRequest): Observable<Reservation> {
-    return this.http.post<Reservation>(this.baseUrl, dto);
+    return this.http.post<Reservation>(`${this.baseUrl}/`, dto);
   }
 
   /** PUT /reservations/{id} -> update reservation */
@@ -99,7 +99,7 @@ export class BookingRestService {
 
   /** POST /customer -> create a new customer */
   createCustomer(dto: { fullName: string; email: string }): Observable<any> {
-    return this.http.post<any>(this.customerUrl, dto);
+    return this.http.post<any>(`${this.customerUrl}/`, dto);
   }
 
   /** PUT /customer/{id} -> update a customer */
