@@ -24,10 +24,7 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Kopiramo zgrajene datoteke.
-# POZOR: Preveri, če je pot 'dist/frontend/browser' pravilna.
-# Če se tvoj projekt ne imenuje 'frontend', zamenjaj 'frontend' s pravim imenom.
-# Pri Angular 17+ je mapa 'browser' obvezna.
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+COPY --from=build /app/dist/frontend /usr/share/nginx/html
 
 EXPOSE 80
 
