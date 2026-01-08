@@ -13,8 +13,8 @@ import {map} from "rxjs/operators";
 @Injectable({ providedIn: 'root' })
 export class BookingRestService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiBaseUrl}/reservations`;
-  private customerUrl = `${environment.apiBaseUrl}/customer`;
+  private baseUrl = `${environment.bookingBaseUrl}/reservations`;
+  private customerUrl = `${environment.bookingBaseUrl}/customer`;
 
   /** GET /reservations -> all reservations */
   getAll(): Observable<Reservation[]> {
