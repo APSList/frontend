@@ -261,21 +261,19 @@ export class BookingDetails implements OnInit {
       const raw = this.form.getRawValue();
 
       // Map form values to the ReservationRequest interface
-      const dto: ReservationRequest = {
-        organizationId: 1, // Set this based on your app's context
-        propertyId: Number(raw.propertyId),
-        customerId: Number(raw.customerId),
-        // Convert Date objects to ISO strings for the backend
-        startDate: new Date(raw.startDate).toISOString(),
-        endDate: new Date(raw.endDate).toISOString(),
-        totalPrice: raw.totalPrice || 0,
-        status: raw.status as ReservationStatusEnum,
-        noOfGuests: raw.noOfGuests || 1,
-        priceElements: {},
-        guestData: {},
-        additionalRequests: {}
+      const dto: any = { // Use 'any' temporarily if you haven't updated the interface yet
+        organization_id: 1,
+        property_id: Number(raw.propertyId),
+        customer_id: Number(raw.customerId),
+        check_in_date: raw.startDate ? new Date(raw.startDate).toISOString() : '',
+        check_out_date: raw.endDate ? new Date(raw.endDate).toISOString() : '',
+        total_price: raw.totalPrice || 0,
+        status: raw.status,
+        no_of_guests: raw.noOfGuests || 1,
+        price_elements: raw.priceElements ?? {},
+        guest_data: raw.guestData ?? {},
+        additional_requests: raw.additionalRequests ?? {}
       };
-
       let saved: Reservation;
 
       if (this.isNew()) {
