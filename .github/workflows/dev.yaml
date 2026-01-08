@@ -67,3 +67,8 @@ jobs:
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
           helm upgrade --install frontend-dev ./Hostflow/helm/charts/frontend \
+            --namespace dev \
+            --create-namespace \
+            --set image.repository=$IMAGE_REPO \
+            --set image.tag=$IMAGE_TAG \
+            --set image.pullPolicy=Always
