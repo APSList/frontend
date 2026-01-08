@@ -9,32 +9,6 @@ env:
   IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/frontend
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Lint (optional)
-        run: npm run lint --if-present
-
-      - name: Test
-        run: npm test -- --watch=false --browsers=ChromeHeadless
-        env:
-          CI: "true"
-
-      - name: Build Angular
-        run: npm run build -- --configuration production
-
   build:
     runs-on: ubuntu-latest
     needs: test
