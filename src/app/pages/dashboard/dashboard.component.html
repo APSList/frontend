@@ -50,7 +50,7 @@
             Units
           </div>
           <div class="text-4xl font-semibold text-900">
-            {{ stats.units }}
+            {{ totalUnitsCount() }}
           </div>
         </p-card>
       </div>
@@ -86,7 +86,30 @@
           <div class="p-3">
             <p-datePicker
               [inline]="true"
-              class="w-full border-none">
+              class="w-full border-none"
+              styleClass="w-full">
+
+              <ng-template pTemplate="date" let-date>
+                <div class="flex flex-column align-items-center gap-1">
+                  <span>{{ date.day }}</span>
+
+                  @let status = getBookingStatus(date);
+                  @if (status) {
+                  <span
+                    class="border-circle"
+                    [style.width]="'6px'"
+                    [style.height]="'6px'"
+                    [ngClass]="{
+            'bg-green-500': status === 'CONFIRMED',
+            'bg-yellow-500': status === 'PAYMENT_REQUIRED' || status === 'CREATED',
+            'bg-red-500': status === 'CANCELLED'
+          }">
+        </span>
+                  } @else {
+                  <span [style.width]="'6px'" [style.height]="'6px'"></span>
+                  }
+                </div>
+              </ng-template>
             </p-datePicker>
           </div>
 

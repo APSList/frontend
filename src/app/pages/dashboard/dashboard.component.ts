@@ -7,6 +7,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TagModule } from 'primeng/tag';
 import { BookingRestService } from '../../services/booking-rest.service';
 import { Reservation } from '../../types/booking.types';
+import {PropertyGraphqlService} from "../../services/property-graphql.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -23,9 +24,15 @@ import { Reservation } from '../../types/booking.types';
 })
 export class Dashboard implements OnInit {
   private bookingRest = inject(BookingRestService);
+  private propertyService = inject(PropertyGraphqlService);
+
+  properties = signal<any[]>([]);
 
   bookings = signal<Reservation[]>([]);
   loading = signal(false);
+
+
+  totalUnitsCount = computed(() => this.properties().length);
 
   activeBookingsCount = computed(() => {
     return this.bookings().filter(b =>
@@ -33,6 +40,20 @@ export class Dashboard implements OnInit {
       b.status !== 'COMPLETED'
     ).length;
   });
+
+  getBookingStatus(date: any): string | null {
+    if (!date) return null;
+
+    // Create a string to compare (YYYY-MM-DD)
+    const cellDate = new Date(date.year, date.month, date.day).toDateString();
+
+    const booking = this.bookings().find(b => {
+      const bDateStr = (b as any).start_date || b.startDate;
+      return bDateStr ? new Date(bDateStr).toDateString() === cellDate : false;
+    });
+
+    return booking ? booking.status : null;
+  }
 
   upcomingArrivalsCount = computed(() => {
     const now = new Date();
@@ -48,6 +69,16 @@ export class Dashboard implements OnInit {
       return checkInDate >= now && checkInDate <= oneMonthFromNow;
     }).length;
   });
+
+  loadProperties() {
+    // Fetch properties from your GraphQL service
+    this.propertyService.getGridProperties().subscribe({
+      next: (data) => {
+        this.properties.set(data);
+      },
+      error: (err) => console.error('Error loading properties:', err)
+    });
+  }
 
   monthlyRevenue = computed(() => {
     const now = new Date();
@@ -76,6 +107,7 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.loadBookings();
+    this.loadProperties();
   }
 
   loadBookings() {
