@@ -193,7 +193,7 @@ export class BookingDetails implements OnInit {
   loadCustomers() {
     this.bookingRest.getAllCustomers().subscribe(customers => {
       this.customerOptions = customers.map(c => ({
-        label: c.fullName,
+        label: c.full_name,
         value: c.id
       }));
     });
