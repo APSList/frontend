@@ -1,20 +1,28 @@
-# ---------- Build stage ----------
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
+
 WORKDIR /app
 
+# Kopiramo package datoteke ločeno, da izkoristimo Docker caching
 COPY package*.json ./
-RUN npm ci
 
+# Namestimo odvisnosti (npm ci je boljši za build sisteme kot npm install)
+RUN npm install
+
+# Kopiramo preostalo kodo
 COPY . .
 
-RUN npm run build -- --configuration production
+# Zgradimo aplikacijo za produkcijo
+RUN npm run build -- --configuration=production
 
-# ---------- Runtime stage ----------
+# Uporabimo Nginx za serviranje statičnih datotek
 FROM nginx:alpine
 
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
-
-# SPA routing (refresh ne sme dati 404)
+# Kopiramo našo Nginx konfiguracijo (glej spodaj)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Kopiramo zgrajene datoteke iz prve faze
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
