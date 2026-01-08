@@ -9,7 +9,7 @@ import {MessageService} from "primeng/api";
 import {APOLLO_OPTIONS, provideApollo} from "apollo-angular";
 import {ApolloClientOptions, InMemoryCache} from "@apollo/client";
 import {HttpLink} from "apollo-angular/http";
-import {environment} from "../environments/environment.development";
+import {environment} from "../environments/environment";
 import {provideHttpClient} from "@angular/common/http";
 
 export const appConfig: ApplicationConfig = {
