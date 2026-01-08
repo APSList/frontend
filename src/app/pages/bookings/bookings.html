@@ -1,1 +1,174 @@
-<p>bookings works!</p>
+<div class="mx-4 my-4">
+  <!-- Header -->
+  <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
+    <div>
+      <h2 class="m-0">Bookings</h2>
+      <div class="text-600 text-sm mt-1">Manage your reservations (details are inside each booking).</div>
+    </div>
+
+    <div class="flex gap-2">
+      <p-button label="Add new" icon="pi pi-plus" (onClick)="create()"></p-button>
+
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        text
+        pTooltip="Refresh"
+        tooltipPosition="bottom"
+        (onClick)="reload()">
+      </p-button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="mt-4 flex flex-column gap-3 md:flex-row md:align-items-center md:flex-wrap">
+    <div class="w-full md:flex-1 md:min-w-20rem">
+      <p-iconfield iconPosition="left" class="w-full">
+        <p-inputicon class="pi pi-search"></p-inputicon>
+        <input
+          pInputText
+          class="w-full"
+          placeholder="Search by customer"
+          [ngModel]="customerFilter()"
+          (ngModelChange)="onCustomerInput($event)"
+        />
+      </p-iconfield>
+    </div>
+
+    <input
+      pInputText
+      class="w-full md:w-14rem"
+      placeholder="Property name"
+      [value]="propertyFilter()"
+      (input)="onPropertyInput($any($event.target).value)"
+    />
+
+    <p-select
+      class="w-full md:w-12rem"
+      [options]="statusOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Status"
+      showClear
+      [ngModel]="statusFilter()"
+      (onChange)="onStatusChange($event.value)">
+    </p-select>
+
+    <p-button
+      class="w-full md:w-auto md:ml-auto"
+      label="Clear"
+      icon="pi pi-filter-slash"
+      severity="secondary"
+      outlined
+      (onClick)="clearFilters()">
+    </p-button>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error()" class="mt-3 p-3 border-round bg-red-50 text-red-700">
+    {{ error() }}
+  </div>
+
+  <!-- Table -->
+  <p-table
+    class="mt-4"
+    [value]="rows()"
+    dataKey="id"
+    [loading]="loading()"
+    [rowHover]="true"
+    breakpoint="768px"
+    sortMode="single"
+    [sortField]="sortField()"
+    [sortOrder]="sortOrder()"
+    [customSort]="true"
+    (sortFunction)="onSortFunction($event)"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="customerId">
+          Customer <p-sortIcon field="customerId"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="propertyId">
+          Property <p-sortIcon field="propertyId"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="checkInDate" class="text-center">
+          Check-in <p-sortIcon field="checkInDate"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="checkOutDate" class="text-center">
+          Check-out <p-sortIcon field="checkOutDate"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="noOfGuests" class="text-center">
+          Guests <p-sortIcon field="noOfGuests"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="totalPrice" class="text-right">
+          Total <p-sortIcon field="totalPrice"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="status" class="text-center">
+          Status <p-sortIcon field="status"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="updatedAt">
+          Updated <p-sortIcon field="updatedAt"></p-sortIcon>
+        </th>
+
+        <th style="width: 4rem"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-b>
+      <tr class="cursor-pointer" (click)="openDetails(b)">
+        <!-- Customer -->
+        <td>{{ b.customerId }} <!-- optionally add name if joined --></td>
+
+        <!-- Property -->
+        <td>{{ b.propertyId }} <!-- optionally add propertyName --></td>
+
+        <!-- Check-in / Check-out -->
+        <td class="text-center">{{ b.checkInDate | date:'mediumDate' }}</td>
+        <td class="text-center">{{ b.checkOutDate | date:'mediumDate' }}</td>
+
+        <!-- Guests -->
+        <td class="text-center">{{ b.noOfGuests ?? '?' }}</td>
+
+        <!-- Total Price -->
+        <td class="text-right">{{ b.totalPrice | currency:'EUR':'symbol':'1.0-2' }}</td>
+
+        <!-- Status -->
+        <td class="text-center">
+          <p-tag [value]="b.status" [severity]="statusSeverity(b.status)"></p-tag>
+        </td>
+
+        <!-- Updated -->
+        <td>
+          <div>{{ b.updatedAt | date:'medium' }}</div>
+        </td>
+
+        <!-- Actions -->
+        <td class="text-right">
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            text
+            pTooltip="Delete"
+            tooltipPosition="left"
+            (onClick)="$event.stopPropagation(); delete(b.id)">
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center p-4 text-600">
+          No bookings found.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

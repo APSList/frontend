@@ -1,44 +1,58 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './pages/dashboard/dashboard.component';
-import {BookingsList} from "./pages/bookings/bookings";
-import {PaymentsList} from "./pages/payments/payments-list.component";
-import {CustomersList} from "./pages/customers/customers-list.component";
-import {UsersList} from "./pages/users/users-list.component";
-import {DashboardCustomer} from "./pages/dashboard-customer/dashboard-customer";
-import {PropertyList} from "./pages/properties/property-list/property-list";
-import {PropertyDetail} from "./pages/properties/property-detail/property-detail";
+import { BookingList } from './pages/bookings/booking-list';
+import { PaymentsList } from './pages/payments/payments-list.component';
+import { CustomersList } from './pages/customers/customers-list.component';
+import { UsersList } from './pages/users/users-list.component';
+import { DashboardCustomer } from './pages/dashboard-customer/dashboard-customer';
+import { PropertyList } from './pages/properties/property-list/property-list';
+import { PropertyDetail } from './pages/properties/property-detail/property-detail';
+import {BookingDetails} from "./pages/bookings/details/booking-details";
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: 'dashboard',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'dashboard',
-    component: Dashboard
+    component: Dashboard,
   },
   {
     path: 'dashboard-customer',
-    component: DashboardCustomer
+    component: DashboardCustomer,
   },
   {
     path: 'bookings',
-    component: BookingsList
+    component: BookingList,
   },
-  { path: 'properties', component: PropertyList },
-  { path: 'properties/new', component: PropertyDetail },
-  { path: 'properties/:id', component: PropertyDetail },
+  {
+    path: 'bookings/:id',
+    component: BookingDetails,
+  },
+  {
+    path: 'properties',
+    component: PropertyList,
+  },
+  {
+    path: 'properties/new',
+    component: PropertyDetail,
+  },
+  {
+    path: 'properties/:id',
+    component: PropertyDetail,
+  },
   {
     path: 'payments',
-    component: PaymentsList
+    component: PaymentsList,
   },
   {
     path: 'customers',
-    component: CustomersList
+    component: CustomersList,
   },
   {
     path: 'users',
-    component: UsersList
-  }
+    component: UsersList,
+  },
 ];
