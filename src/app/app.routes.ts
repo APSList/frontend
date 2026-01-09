@@ -7,9 +7,9 @@ import { UsersList } from './pages/users/users-list.component';
 import { DashboardCustomer } from './pages/dashboard-customer/dashboard-customer';
 import { PropertyList } from './pages/properties/property-list/property-list';
 import { PropertyDetail } from './pages/properties/property-detail/property-detail';
-import {BookingDetails} from "./pages/bookings/details/booking-details";
-import {authGuard} from "./core/guards/auth-guard";
-import {LoginComponent} from "./pages/login/login";
+import { BookingDetails } from './pages/bookings/details/booking-details';
+import { authGuard } from "./core/guards/auth-guard";
+import { LoginComponent } from "./pages/login/login";
 
 export const routes: Routes = [
   // 1. Public Routes (e.g., Login)
