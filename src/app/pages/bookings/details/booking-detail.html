@@ -124,7 +124,7 @@
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Check In</label>
             <p-datepicker
-              formControlName="startDate"
+              formControlName="check_in_date"
               [showIcon]="true"
               (onSelect)="updateCheckOutLimit($event)"
               iconDisplay="input"
@@ -138,7 +138,7 @@
           <div class="flex flex-column gap-1">
             <label class="text-sm text-600">Check Out</label>
             <p-datepicker
-              formControlName="endDate"
+              formControlName="check_out_date"
               [showIcon]="true"
               [minDate]="minCheckOutDate"
               iconDisplay="input"

@@ -26,8 +26,8 @@ export interface Reservation {
   customerId: number;
   customerName?: string; // Optional if joined
 
-  startDate: string; // ISO string
-  endDate: string;   // ISO string
+  check_in_date: string; // ISO string
+  check_out_date: string;   // ISO string
 
   totalPrice: number;
   status: ReservationStatusEnum;

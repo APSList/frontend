@@ -84,8 +84,8 @@ export class BookingDetails implements OnInit {
     this.form = this.fb.group({
       propertyId: [null, Validators.required],
       customerId: [null, Validators.required],
-      startDate: [null, Validators.required],
-      endDate: [null, Validators.required],
+      check_in_date: [null, Validators.required],
+      check_out_date: [null, Validators.required],
       status: ['CREATED', Validators.required],
       totalPrice: [0, Validators.required],
       noOfGuests: [1, [Validators.required, Validators.min(1)]],
@@ -133,8 +133,8 @@ export class BookingDetails implements OnInit {
     this.form.valueChanges.pipe(
       debounceTime(100), // Wait for user to stop typing/clicking
       distinctUntilChanged((prev, curr) =>
-        prev.startDate === curr.startDate &&
-        prev.endDate === curr.endDate &&
+        prev.check_in_date === curr.check_in_date &&
+        prev.check_out_date === curr.check_out_date &&
         prev.noOfGuests === curr.noOfGuests &&
         prev.pricePerPersonDay === curr.pricePerPersonDay
       )
@@ -148,8 +148,8 @@ export class BookingDetails implements OnInit {
         this.form.patchValue({
           propertyId: res.propertyId,
           customerId: res.customerId,
-          startDate: res.startDate,
-          endDate: res.endDate,
+          check_in_date: res.check_in_date ? new Date(res.check_in_date) : null,
+          check_out_date: res.check_out_date ? new Date(res.check_out_date) : null,
           status: res.status,
           totalPrice: res.totalPrice,
           noOfGuests: res.noOfGuests,
@@ -226,11 +226,11 @@ export class BookingDetails implements OnInit {
   }
 
   calculateTotalPrice() {
-    const { startDate, endDate, noOfGuests, pricePerPersonDay } = this.form.getRawValue();
+    const { check_in_date, check_out_date, noOfGuests, pricePerPersonDay } = this.form.getRawValue();
 
-    if (startDate && endDate && noOfGuests && pricePerPersonDay) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+    if (check_in_date && check_out_date && noOfGuests && pricePerPersonDay) {
+      const start = new Date(check_in_date);
+      const end = new Date(check_out_date);
 
       // Calculate difference in days
       const diffTime = end.getTime() - start.getTime();
@@ -265,8 +265,8 @@ export class BookingDetails implements OnInit {
         organization_id: 1,
         property_id: Number(raw.propertyId),
         customer_id: Number(raw.customerId),
-        check_in_date: raw.startDate ? new Date(raw.startDate).toISOString() : '',
-        check_out_date: raw.endDate ? new Date(raw.endDate).toISOString() : '',
+        check_in_date: raw.check_in_date ? new Date(raw.check_in_date).toISOString() : '',
+        check_out_date: raw.check_out_date ? new Date(raw.check_out_date).toISOString() : '',
         total_price: raw.totalPrice || 0,
         status: raw.status,
         no_of_guests: raw.noOfGuests || 1,

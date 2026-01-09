@@ -71,13 +71,15 @@
               </span>
 
               <div class="flex gap-4">
-                <div class="flex align-items-center gap-2 text-sm text-600">
-                  <span class="w-1rem h-1rem border-round bg-green-500"></span>
-                  Confirmed
-                </div>
-                <div class="flex align-items-center gap-2 text-sm text-600">
-                  <span class="w-1rem h-1rem border-round bg-yellow-500"></span>
-                  Pending Payment
+                <div class="flex gap-4">
+                  <div class="flex align-items-center gap-2 text-sm text-600">
+                    <span class="w-1rem h-1rem border-round bg-blue-500"></span>
+                    Check-In
+                  </div>
+                  <div class="flex align-items-center gap-2 text-sm text-600">
+                    <span class="w-1rem h-1rem border-round bg-orange-500"></span>
+                    Check-Out
+                  </div>
                 </div>
               </div>
             </div>
@@ -91,23 +93,22 @@
 
               <ng-template pTemplate="date" let-date>
                 <div class="flex flex-column align-items-center gap-1">
-                  <span>{{ date.day }}</span>
+                  <span class="text-900">{{ date.day }}</span>
 
-                  @let status = getBookingStatus(date);
-                  @if (status) {
-                  <span
-                    class="border-circle"
-                    [style.width]="'6px'"
-                    [style.height]="'6px'"
-                    [ngClass]="{
-            'bg-green-500': status === 'CONFIRMED',
-            'bg-yellow-500': status === 'PAYMENT_REQUIRED' || status === 'CREATED',
-            'bg-red-500': status === 'CANCELLED'
-          }">
-        </span>
-                  } @else {
-                  <span [style.width]="'6px'" [style.height]="'6px'"></span>
-                  }
+                  <div class="flex gap-1 justify-content-center" style="min-height: 6px;">
+                    @for (event of getDayEvents(date); track $index) {
+                    <span
+                      class="border-circle"
+                      [pTooltip]="event.type === 'IN' ? 'Check-in' : 'Check-out'"
+                      [style.width]="'6px'"
+                      [style.height]="'6px'"
+                      [ngClass]="{
+              'bg-blue-500': event.type === 'IN',
+              'bg-orange-500': event.type === 'OUT'
+            }">
+          </span>
+                    }
+                  </div>
                 </div>
               </ng-template>
             </p-datePicker>
@@ -116,39 +117,45 @@
         </p-card>
       </div>
 
-      <!-- WORKER TASKS -->
       <div class="col-12 md:col-6">
         <p-card class="p-4 h-full border-round-2xl shadow-1 surface-card">
 
           <ng-template pTemplate="header">
-            <span class="font-semibold text-lg text-900">
-              Worker Tasks
-            </span>
+      <span class="font-semibold text-lg text-900">
+        Upcoming Agenda
+      </span>
           </ng-template>
 
           <p-table
-            [value]="workerTasks"
+            [value]="workerTasks()"
             [rowHover]="true"
             class="text-sm">
 
             <ng-template pTemplate="header">
               <tr>
-                <th class="text-700 font-medium">Task</th>
-                <th class="text-700 font-medium">PropertyModel</th>
-                <th class="text-700 font-medium">Assigned To</th>
+                <th class="text-700 font-medium">Booking Code</th>
+                <th class="text-700 font-medium">Type</th>
+                <th class="text-700 font-medium">Date</th>
+                <th class="text-700 font-medium">Property</th>
               </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-task>
               <tr>
-                <td class="text-900 font-medium">
-                  {{ task.task }}
+                <td class="text-900 font-semibold">
+                  #{{ task.bookingId }}
+                </td>
+                <td>
+                  <p-tag
+                    [value]="task.type"
+                    [severity]="task.type === 'CHECK-IN' ? 'info' : 'warn'">
+                  </p-tag>
                 </td>
                 <td class="text-700">
-                  {{ task.property }}
+                  {{ task.date | date:'MMM d, yyyy' }}
                 </td>
                 <td class="text-700">
-                  {{ task.assignedTo }}
+                  {{ task.propertyName }}
                 </td>
               </tr>
             </ng-template>

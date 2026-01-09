@@ -8,6 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { BookingRestService } from '../../services/booking-rest.service';
 import { Reservation } from '../../types/booking.types';
 import {PropertyGraphqlService} from "../../services/property-graphql.service";
+import { TooltipModule } from "primeng/tooltip";
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +18,8 @@ import {PropertyGraphqlService} from "../../services/property-graphql.service";
     CardModule,
     TableModule,
     DatePickerModule,
-    TagModule
+    TagModule,
+    TooltipModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -42,18 +44,54 @@ export class Dashboard implements OnInit {
   });
 
   getBookingStatus(date: any): string | null {
-    if (!date) return null;
+    const year = date.year;
+    const month = String(date.month + 1).padStart(2, '0');
+    const day = String(date.day).padStart(2, '0');
+    const calendarDateStr = `${year}-${month}-${day}`;
 
-    // Create a string to compare (YYYY-MM-DD)
-    const cellDate = new Date(date.year, date.month, date.day).toDateString();
 
-    const booking = this.bookings().find(b => {
-      const bDateStr = (b as any).start_date || b.startDate;
-      return bDateStr ? new Date(bDateStr).toDateString() === cellDate : false;
+    const match = this.bookings().find(b => {
+      // If your backend sends a full ISO string, extract just the date part
+      const bookingDateStr = b.check_in_date?.split('T')[0];
+      console.log(bookingDateStr);
+      return bookingDateStr === calendarDateStr;
     });
 
-    return booking ? booking.status : null;
+    return match ? match.status : null;
   }
+
+  workerTasks = computed(() => {
+    const tasks: any[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    this.bookings().forEach(b => {
+      const checkIn = new Date(b.check_in_date);
+      const checkOut = new Date(b.check_out_date);
+
+      // Only show tasks from today onwards
+      if (checkIn >= today) {
+        tasks.push({
+          bookingId: b.id,
+          type: 'CHECK-IN',
+          date: checkIn,
+          propertyName: b.propertyName || 'Unknown Property'
+        });
+      }
+
+      if (checkOut >= today) {
+        tasks.push({
+          bookingId: b.id,
+          type: 'CHECK-OUT',
+          date: checkOut,
+          propertyName: b.propertyName || 'Unknown Property'
+        });
+      }
+    });
+
+    // Sort by date so the soonest tasks are at the top
+    return tasks.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 10);
+  });
 
   upcomingArrivalsCount = computed(() => {
     const now = new Date();
@@ -61,11 +99,11 @@ export class Dashboard implements OnInit {
     oneMonthFromNow.setMonth(now.getMonth() + 1);
 
     return this.bookings().filter(booking => {
-      // Use raw.startDate or raw.start_date based on your API
-      const startDateStr = booking.startDate || (booking as any).start_date;
-      if (!startDateStr) return false;
+      // Use raw.check_in_date or raw.start_date based on your API
+      const check_in_dateStr = booking.check_in_date || (booking as any).start_date;
+      if (!check_in_dateStr) return false;
 
-      const checkInDate = new Date(startDateStr);
+      const checkInDate = new Date(check_in_dateStr);
       return checkInDate >= now && checkInDate <= oneMonthFromNow;
     }).length;
   });
@@ -121,16 +159,40 @@ export class Dashboard implements OnInit {
     });
   }
 
+  calendarEvents = computed(() => {
+    const eventMap: Record<string, { type: string, status: string }[]> = {};
+
+    this.bookings().forEach(b => {
+      if (b.status == 'CONFIRMED') {
+        // 1. Normalize Check-in Date
+        const inDate = b.check_in_date?.split('T')[0];
+        if (inDate) {
+          if (!eventMap[inDate]) eventMap[inDate] = [];
+          eventMap[inDate].push({ type: 'IN', status: b.status });
+        }
+
+        // 2. Normalize Check-out Date
+        const outDate = b.check_out_date?.split('T')[0];
+        if (outDate) {
+          if (!eventMap[outDate]) eventMap[outDate] = [];
+          eventMap[outDate].push({ type: 'OUT', status: b.status });
+        }
+      }
+    });
+
+    return eventMap;
+  });
+
+// Helper for the template
+  getDayEvents(date: any) {
+    const key = `${date.year}-${String(date.month + 1).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
+    return this.calendarEvents()[key] || [];
+  }
+
   stats = {
     activeBookings: 18,
     upcomingArrivals: 6,
     revenue: 12345,
     units: 24
   };
-
-  workerTasks = [
-    { task: 'Cleaning',  property: 'Oceanview Apartment', assignedTo: 'John Smith' },
-    { task: 'Check-in',  property: 'City Center Studio', assignedTo: 'Jane Doe' },
-    { task: 'Upcoming',  property: 'Lakeside Condo',     assignedTo: 'Alice Johnson' }
-  ];
 }
