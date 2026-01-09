@@ -62,7 +62,7 @@ export class BookingDetails implements OnInit {
 
   customerOptions: { label: string, value: string | number }[] = [];
   showCustomerDialog = false;
-  newCustomer = { fullName: '', email: '' };
+  newCustomer = { full_name: '', email: '' };
   creatingCustomer = false;
 
   // Form
@@ -200,12 +200,12 @@ export class BookingDetails implements OnInit {
   }
 
   openNewCustomerDialog() {
-    this.newCustomer = { fullName: '', email: '' };
+    this.newCustomer = { full_name: '', email: '' };
     this.showCustomerDialog = true;
   }
 
   saveCustomer() {
-    if (!this.newCustomer.fullName || !this.newCustomer.email) return;
+    if (!this.newCustomer.full_name || !this.newCustomer.email) return;
 
     this.creatingCustomer = true;
     this.bookingRest.createCustomer(this.newCustomer).subscribe({

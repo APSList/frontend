@@ -98,7 +98,7 @@ export class BookingRestService {
   }
 
   /** POST /customer -> create a new customer */
-  createCustomer(dto: { fullName: string; email: string }): Observable<any> {
+  createCustomer(dto: { full_name: string; email: string }): Observable<any> {
     return this.http.post<any>(`${this.customerUrl}/`, dto);
   }
 
