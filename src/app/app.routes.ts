@@ -8,7 +8,7 @@ import { DashboardCustomer } from './pages/dashboard-customer/dashboard-customer
 import { PropertyList } from './pages/properties/property-list/property-list';
 import { PropertyDetail } from './pages/properties/property-detail/property-detail';
 import { BookingDetails } from './pages/bookings/details/booking-details';
-import { authGuard } from "./core/guards/auth-guard";
+import { authGuard } from './core/guards/auth-guard';
 import { LoginComponent } from "./pages/login/login";
 
 export const routes: Routes = [
