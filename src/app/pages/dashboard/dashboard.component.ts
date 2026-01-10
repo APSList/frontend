@@ -74,7 +74,7 @@ export class Dashboard implements OnInit {
       // 1. Find the property name from the existing properties signal
       // @ts-ignore
       const id = b.propertyId || b["property_id"];
-      const property = allProperties.find(p => p.id === id);
+      const property = allProperties.find(p => String(p.id) === String(id));
       const propertyName = property ? property.name : `Property #${id}`;
 
       const checkIn = new Date(b.check_in_date);
