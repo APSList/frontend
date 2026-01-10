@@ -1,27 +1,28 @@
 # Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.6.
+Ta projekt je bil ustvarjen z [Angular CLI](https://github.com/angular/angular-cli) različice 18.0.6.
 
-## Development server
+## Razvojni strežnik (Development server)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Za zagon razvojnega strežnika poženi ukaz `ng serve`. Odpri `http://localhost:4200/`. Aplikacija se bo samodejno osvežila, če spremeniš katero koli izvorno datoteko.
 
-## Code scaffolding
+## Konfiguracija okolja (Environment)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Projekt uporablja konfiguracijske datoteke, ki se nahajajo v mapi `src/environments/`:
+* `environment.ts` (Privzeta konfiguracija)
+* `environment.dev.ts` (Razvojna konfiguracija)
 
-## Build
+### Struktura konfiguracije
+Zagotovi, da imajo okoljske datoteke naslednjo strukturo z ustreznimi vrednostmi:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```typescript
+export const environment = {
+  production: false, // true za environment.ts, false za dev
+  apiBaseUrl: 'URL_DO_PROPERTY_API',
+  paymentBaseUrl: 'URL_DO_PAYMENT_API',
+  graphqlUrl: 'URL_DO_GRAPHQL_ENDPOINTA',
+  bookingBaseUrl: 'URL_DO_BOOKING_API',
+  profileBaseUrl: 'URL_DO_PROFILE_API',
+  supabaseUrl: 'URL_DO_SUPABASE_INSTANCE',
+  supabaseKey: 'SUPABASE_JAVNI_KLJUC'
+};
