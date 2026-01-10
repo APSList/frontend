@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'https://hostflow.software/property',
+  paymentBaseUrl: 'http://localhost:8007',
   graphqlUrl: 'https://hostflow.software/property/graphql',
   bookingBaseUrl: 'https://hostflow.software/booking',
   profileBaseUrl: 'https://hostflow.software/profile',
