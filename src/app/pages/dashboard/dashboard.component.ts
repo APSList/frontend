@@ -9,6 +9,7 @@ import { BookingRestService } from '../../services/booking-rest.service';
 import { Reservation } from '../../types/booking.types';
 import {PropertyGraphqlService} from "../../services/property-graphql.service";
 import { TooltipModule } from "primeng/tooltip";
+import {PropertyRestService} from "../../services/property-rest.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -65,31 +66,42 @@ export class Dashboard implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    this.bookings().forEach(b => {
+    // Get the current values of both signals
+    const allBookings = this.bookings();
+    const allProperties = this.properties();
+
+    allBookings.forEach(b => {
+      // 1. Find the property name from the existing properties signal
+      // @ts-ignore
+      const id = b.propertyId || b["property_id"];
+      const property = allProperties.find(p => p.id === id);
+      const propertyName = property ? property.name : `Property #${id}`;
+
       const checkIn = new Date(b.check_in_date);
       const checkOut = new Date(b.check_out_date);
 
-      // Only show tasks from today onwards
+      // 2. Add Check-In Task
       if (checkIn >= today) {
         tasks.push({
           bookingId: b.id,
           type: 'CHECK-IN',
           date: checkIn,
-          propertyName: b.propertyName || 'Unknown Property'
+          propertyName: propertyName
         });
       }
 
+      // 3. Add Check-Out Task
       if (checkOut >= today) {
         tasks.push({
           bookingId: b.id,
           type: 'CHECK-OUT',
           date: checkOut,
-          propertyName: b.propertyName || 'Unknown Property'
+          propertyName: propertyName
         });
       }
     });
 
-    // Sort by date so the soonest tasks are at the top
+    // Sort by date (soonest first) and take the top 10
     return tasks.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 10);
   });
 
