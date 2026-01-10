@@ -9,12 +9,13 @@ import {MessageService} from "primeng/api";
 import {APOLLO_OPTIONS, provideApollo} from "apollo-angular";
 import {ApolloClientOptions, InMemoryCache} from "@apollo/client";
 import {HttpLink} from "apollo-angular/http";
-import {environment} from "../environments/environment.development";
-import {provideHttpClient} from "@angular/common/http";
+import {environment} from "../environments/environment";
+import {provideHttpClient, withInterceptors} from "@angular/common/http";
+import {jwtInterceptor} from "./core/interceptors/interceptor";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([jwtInterceptor])),
     providePrimeNG({
       theme: {
         preset: Aura,

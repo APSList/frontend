@@ -1,6 +1,6 @@
 <div class="m-4">
   <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
-    <h2 class="m-0">Customers</h2>
+    <h2 class="m-0">Bookings</h2>
     <p-button label="Add New" icon="pi pi-plus" (onClick)="addNew()"></p-button>
   </div>
 
@@ -8,25 +8,33 @@
     <ng-template pTemplate="header">
       <tr>
         <th>Code</th>
-        <th>Name</th>
-        <th>Email</th>
+        <th>Property</th>
+        <th>Customer</th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Total Price</th>
+        <th>Status</th>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-b>
-      <tr class="cursor-pointer">
+      <tr class="cursor-pointer" (click)="openDetails(b)">
         <td>{{ b.id }}</td>
-        <td>{{ b.full_name }}</td>
-        <td>{{ b.email}}</td>
+        <td>{{ b.propertyName }}</td>
+        <td>{{ b.customerName }}</td>
+        <td>{{ b.checkInDate | date:'mediumDate' }}</td>
+        <td>{{ b.checkOutDate | date:'mediumDate' }}</td>
+        <td>{{ b.totalPrice | currency:'EUR':'symbol':'1.0-2' }}</td>
         <td>
           <p-tag [value]="b.status"></p-tag>
         </td>
       </tr>
     </ng-template>
 
+
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6" class="text-center p-4">No customers found.</td>
+        <td colspan="6" class="text-center p-4">No bookings found.</td>
       </tr>
     </ng-template>
   </p-table>
