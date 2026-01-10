@@ -26,15 +26,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PropertyGraphqlService } from '../../../services/property-graphql.service';
 import { PropertyRestService } from '../../../services/property-rest.service';
-import type {Property, PropertyStatusEnum} from '../../../types/property.types';
+import type { Property, PropertyStatusEnum } from '../../../types/property.types';
 
 import type {
   PropertyFilterInput,
   PropertySortInput,
   SortDirection,
 } from '../../../types/property.graphql.types';
-import {IconField} from "primeng/iconfield";
-import {InputIcon} from "primeng/inputicon";
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 
 type SortField =
   | 'name'
@@ -91,6 +91,9 @@ export class PropertyList implements OnInit {
 
   private reload$ = new Subject<void>();
 
+  // ✅ forces reload even if filters/sort are unchanged
+  private reloadTick = signal(0);
+
   private queryKey = computed(() =>
     JSON.stringify({
       name: this.nameFilter().trim(),
@@ -98,6 +101,7 @@ export class PropertyList implements OnInit {
       status: this.statusFilter(),
       sortField: this.sortField(),
       sortOrder: this.sortOrder(),
+      tick: this.reloadTick(), // ✅ KEY
     })
   );
 
@@ -176,6 +180,10 @@ export class PropertyList implements OnInit {
   delete(id: number) {
     if (!confirm('Delete property?')) return;
 
+    // ✅ optimistic remove (UI takoj)
+    const prev = this.properties();
+    this.properties.set(prev.filter((p) => p.id !== id));
+
     this.loading.set(true);
     this.error.set(null);
 
@@ -185,6 +193,10 @@ export class PropertyList implements OnInit {
         catchError((err) => {
           console.error(err);
           this.error.set('Delete failed.');
+
+          // rollback če delete faila
+          this.properties.set(prev);
+
           return of(void 0);
         }),
         finalize(() => this.loading.set(false)),
@@ -194,6 +206,7 @@ export class PropertyList implements OnInit {
   }
 
   reload() {
+    this.reloadTick.update((v) => v + 1); // ✅ force distinct key change
     this.reload$.next();
   }
 
