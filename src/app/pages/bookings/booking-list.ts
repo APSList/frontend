@@ -7,7 +7,7 @@ import { TagModule } from 'primeng/tag';
 
 import { BookingRestService } from '../../services/booking-rest.service';
 import { PropertyRestService } from '../../services/property-rest.service';
-import type { Reservation } from '../../types/booking.types';
+import type {Reservation, ReservationStatusEnum} from '../../types/booking.types';
 
 interface ReservationDisplay {
   id: number;
@@ -122,6 +122,15 @@ export class BookingList implements OnInit {
         error: (err) => console.error(`Failed to load customer ${id}`, err)
       });
     });
+  }
+
+  statusSeverity(status: ReservationStatusEnum | undefined) {
+    switch (status) {
+      case 'CONFIRMED': return 'success';
+      case 'CANCELLED': return 'danger';
+      case 'PAYMENT_REQUIRED': return 'warn';
+      default: return 'info';
+    }
   }
 
 }

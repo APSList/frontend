@@ -126,6 +126,8 @@
             <p-datepicker
               formControlName="check_in_date"
               [showIcon]="true"
+              [disabledDates]="disabledDates()"
+              [minDate]="minCheckInDate"
               (onSelect)="updateCheckOutLimit($event)"
               iconDisplay="input"
               dateFormat="yy-mm-dd"
@@ -141,6 +143,7 @@
               formControlName="check_out_date"
               [showIcon]="true"
               [minDate]="minCheckOutDate"
+              [disabledDates]="disabledDates()"
               iconDisplay="input"
               dateFormat="yy-mm-dd"
               class="w-full">

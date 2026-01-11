@@ -26,7 +26,10 @@
         <td>{{ b.checkOutDate | date:'mediumDate' }}</td>
         <td>{{ b.totalPrice | currency:'EUR':'symbol':'1.0-2' }}</td>
         <td>
-          <p-tag [value]="b.status"></p-tag>
+          <p-tag
+            [value]="b.status"
+            [severity]="statusSeverity(b.status)">
+          </p-tag>
         </td>
       </tr>
     </ng-template>

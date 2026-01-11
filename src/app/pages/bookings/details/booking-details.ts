@@ -20,6 +20,7 @@ import {SelectModule} from "primeng/select";
 import {PropertyImageUploader} from "../../../components/property-image-uploader/property-image-uploader";
 import {DialogModule} from "primeng/dialog";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
+import {SupabaseService} from "../../../services/supabase.service";
 
 @Component({
   standalone: true,
@@ -49,12 +50,17 @@ export class BookingDetails implements OnInit {
   private fb = inject(FormBuilder);
   private propertyService = inject(PropertyGraphqlService);
   private cd : ChangeDetectorRef = inject(ChangeDetectorRef);
+  private supabase = inject(SupabaseService);
 
   booking = signal<Reservation | null>(null);
   loading = signal(true);
   saving = signal(false);
   minCheckOutDate: Date = new Date();
+  minCheckInDate: Date = new Date();
   today: Date = new Date();
+
+  disabledDates = signal<Date[]>([]);
+  allReservationsForProperty: Reservation[] = [];
 
   // New / edit signals
   isNew = signal(false);
@@ -72,11 +78,10 @@ export class BookingDetails implements OnInit {
   loadingProperties = false;
 
   readonly bookingStatusOptions = [
-    { label: 'Confirmed', value: 'CONFIRMED' },
-    { label: 'Payment Required', value: 'PAYMENT_REQUIRED' },
-    { label: 'Created', value: 'CREATED' },
-    { label: 'Cancelled', value: 'CANCELLED' }
-
+    { label: 'CONFIRMED', value: 'CONFIRMED' },
+    { label: 'PAYMENT_REQUIRED', value: 'PAYMENT_REQUIRED' },
+    { label: 'CREATED', value: 'CREATED' },
+    { label: 'CANCELLED', value: 'CANCELLED' }
   ];
 
   constructor() {
@@ -119,6 +124,18 @@ export class BookingDetails implements OnInit {
 
     this.form.valueChanges.subscribe(() => {
       this.calculateTotalPrice();
+    });
+
+    this.form.get('propertyId')?.valueChanges.subscribe(propertyId => {
+      if (propertyId) {
+        this.fetchReservedDates(propertyId);
+
+        // Update price helper
+        const selected = this.propertyOptions.find(p => p.value === propertyId);
+        if (selected?.price) {
+          this.form.patchValue({ pricePerPersonDay: selected.price });
+        }
+      }
     });
 
     // Specifically watch propertyId to fetch its price
@@ -169,6 +186,37 @@ export class BookingDetails implements OnInit {
         console.error(err);
         this.loading.set(false);
       }
+    });
+  }
+
+  fetchReservedDates(propertyId: number) {
+    // Assuming your bookingRest has a method to get bookings by property
+    // If not, you may need to filter a 'getAll' call or add a specific endpoint
+    this.bookingRest.getAll().subscribe(allBookings => {
+      const currentBookingId = this.booking()?.id;
+
+      // 1. Filter bookings for this property (exclude the one we are currently editing)
+      const otherBookings = allBookings.filter(b =>
+        b.propertyId === propertyId &&
+        b.id !== currentBookingId &&
+        b.status !== 'CANCELLED'
+      );
+
+      // 2. Generate Date objects for every day between check-in and check-out
+      const datesToBlock: Date[] = [];
+
+      otherBookings.forEach(res => {
+        const start = new Date(res.check_in_date);
+        const end = new Date(res.check_out_date);
+
+        let current = new Date(start);
+        while (current <= end) {
+          datesToBlock.push(new Date(current));
+          current.setDate(current.getDate() + 1);
+        }
+      });
+
+      this.disabledDates.set(datesToBlock);
     });
   }
 
@@ -256,17 +304,26 @@ export class BookingDetails implements OnInit {
       return;
     }
 
+    const currentOrgId = this.supabase.user()?.user_metadata['organization_id'];
+
     this.saving.set(true);
     try {
       const raw = this.form.getRawValue();
 
+      const addTwoHours = (dateStr: string) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        d.setHours(d.getHours() + 2); // Tukaj prištejemo 2 uri
+        return d.toISOString();
+      };
+
       // Map form values to the ReservationRequest interface
       const dto: any = { // Use 'any' temporarily if you haven't updated the interface yet
-        organization_id: 1,
+        organization_id: currentOrgId,
         property_id: Number(raw.propertyId),
         customer_id: Number(raw.customerId),
-        check_in_date: raw.check_in_date ? new Date(raw.check_in_date).toISOString() : '',
-        check_out_date: raw.check_out_date ? new Date(raw.check_out_date).toISOString() : '',
+        check_in_date: raw.check_in_date ? addTwoHours(new Date(raw.check_in_date).toISOString()) : '',
+        check_out_date: raw.check_out_date ? addTwoHours(new Date(raw.check_out_date).toISOString()) : '',
         total_price: raw.totalPrice || 0,
         status: raw.status,
         no_of_guests: raw.noOfGuests || 1,
@@ -309,6 +366,7 @@ export class BookingDetails implements OnInit {
       default: return 'info';
     }
   }
+
   updateCheckOutLimit(selectedInDate: Date) {
     if (selectedInDate) {
       const nextDay = new Date(selectedInDate);
