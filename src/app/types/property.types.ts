@@ -85,7 +85,7 @@ export interface Property {
   updatedAt: string;
   updatedBy?: string | null;
 
-  images?: PropertyImage[] | null;
+  propertyImages?: PropertyImage[] | null;
   propertyAmenities?: PropertyAmenity[] | null;
 }
 

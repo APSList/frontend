@@ -1,41 +1,35 @@
-<!-- HEADER -->
+@if (isLoggedIn) {
 <div class="surface-card border-bottom-1 border-200 sticky top-0 z-5">
 
-  <div class="flex align-items-center justify-content-between px-4 lg:px-6 py-4"
-       style="max-width:1280px;margin:0 auto;">
+  <div class="flex align-items-center justify-content-between px-4 lg:px-8 py-3"
+       style="max-width:1440px; margin:0 auto;">
 
-    <!-- LEFT -->
     <div class="flex align-items-center gap-6">
-
-      <!-- LOGO -->
       <span class="text-2xl font-bold text-900 cursor-pointer" routerLink="/dashboard">
         HostFlow
       </span>
+      <span class="text-xs text-500 font-medium -mt-1">
+      {{ supabase.orgName() }}
+    </span>
 
-      <!-- DESKTOP NAV -->
       <nav #navBar class="hidden lg:flex gap-6 nav-wrap">
-        @for (item of navItems; track item.route; let i = $index) {
-          <button
-            #navBtn
-            type="button"
-            class="nav-item"
-            [class.is-active]="activeIndex === i"
-            (click)="go(item.route)"
-          >
-            {{ item.label }}
-          </button>
+        @for (item of visibleNavItems; track item.route; let i = $index) {
+        <button
+          #navBtn
+          type="button"
+          class="nav-item"
+          [class.is-active]="activeIndex === i"
+          (click)="go(item.route)"
+        >
+          {{ item.label }}
+        </button>
         }
 
-        <!-- moving underline -->
         <span #indicator class="nav-indicator"></span>
       </nav>
-
     </div>
 
-    <!-- RIGHT -->
     <div class="flex align-items-center gap-3">
-
-      <!-- MOBILE MENU BUTTON -->
       <button
         class="lg:hidden p-2 border-none bg-transparent cursor-pointer"
         (click)="toggleMenu()"
@@ -45,31 +39,49 @@
         <i class="pi pi-bars text-2xl text-700"></i>
       </button>
 
-      <!-- USER -->
-      <div class="hidden lg:flex align-items-center gap-2 cursor-pointer">
-        <p-avatar label="O" shape="circle" class="user-avatar bg-primary"></p-avatar>
-        <span class="text-700 font-medium">Owner</span>
-      </div>
+      <div class="hidden lg:flex align-items-center gap-1">
+        <div class="hidden lg:flex align-items-center gap-1 cursor-pointer">
+          <span class="text-700 font-medium">
+        {{ userFullName }} ({{ userRole | titlecase }})
+      </span>
+          <p-avatar
+            [label]="userFullName.charAt(0) || 'U'"
+            shape="circle"
+            class="user-avatar bg-primary">
+          </p-avatar>
+        </div>
 
+        <button
+          class="p-2 border-none bg-transparent cursor-pointer text-600 hover:text-900 transition-colors"
+          (click)="logout()"
+          title="Sign Out">
+          <i class="pi pi-sign-out text-xl"></i>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- MOBILE MENU -->
   @if (mobileMenuOpen) {
-    <div class="lg:hidden surface-card border-top-1 border-200 px-4 py-3">
-      <div class="flex flex-column gap-2">
-        @for (item of navItems; track item.route; let i = $index) {
-          <button
-            type="button"
-            class="nav-item mobile"
-            [class.is-active]="activeIndex === i"
-            (click)="go(item.route); toggleMenu()"
-          >
-            {{ item.label }}
-          </button>
-        }
-      </div>
+  <div class="lg:hidden surface-card border-top-1 border-200 px-4 py-3">
+    <div class="flex flex-column gap-2">
+      @for (item of visibleNavItems; track item.route; let i = $index) {
+      <button
+        type="button"
+        class="nav-item mobile"
+        [class.is-active]="activeIndex === i"
+        (click)="go(item.route); toggleMenu()"
+      >
+        {{ item.label }}
+      </button>
+      }
+      <button
+        type="button"
+        class="nav-item mobile text-red-500"
+        (click)="logout()">
+        <i class="pi pi-sign-out mr-2"></i> Sign Out
+      </button>
     </div>
+  </div>
   }
-
 </div>
+}

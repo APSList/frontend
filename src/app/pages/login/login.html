@@ -1,0 +1,67 @@
+<div class="surface-50 min-h-screen flex align-items-start justify-content-center">
+
+  <div class="px-4 py-4 w-full" style="max-width: 450px; margin-top: 10vh;">
+
+    <div class="text-center mb-5">
+      <div class="text-900 text-3xl font-semibold mb-2">Log in</div>
+      <span class="text-600 font-medium">Please enter your details to sign in</span>
+    </div>
+
+    <p-card class="border-round-2xl shadow-1 surface-card">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="p-fluid flex flex-column gap-4">
+
+        <div class="flex flex-column gap-2">
+          <label for="email" class="text-sm font-medium text-900">Email Address</label>
+          <div class="p-input-icon-left w-full">
+            <input
+              id="email"
+              type="email"
+              pInputText
+              formControlName="email"
+              placeholder="you@example.com"
+              class="w-full"
+              [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.dirty" />
+          </div>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.dirty) {
+          <small class="p-error">Please enter a valid email.</small>
+          }
+        </div>
+
+        <div class="flex flex-column gap-2">
+          <label for="password" class="text-sm font-medium text-900">Password</label>
+          <p-password
+            id="password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            placeholder="••••••••"
+            inputStyleClass="w-full">
+          </p-password>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.dirty) {
+          <small class="p-error">Password is required.</small>
+          }
+        </div>
+
+        <div class="mt-4 flex justify-content-center">
+          <p-button
+            type="submit"
+            label="Sign In"
+            icon="pi pi-sign-in"
+            [loading]="loading"
+            [disabled]="loginForm.invalid"
+            severity="primary"
+            rounded>
+          </p-button>
+        </div>
+
+      </form>
+    </p-card>
+
+    <div class="text-center mt-4">
+      <p class="text-600">
+        Don't have an account? <span class="text-primary font-medium cursor-pointer">Contact Admin</span>
+      </p>
+    </div>
+
+  </div>
+</div>

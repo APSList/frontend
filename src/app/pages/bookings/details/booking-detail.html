@@ -1,0 +1,252 @@
+<div class="surface-50 min-h-screen">
+  <div class="px-4 py-4" style="max-width:1280px;margin:0 auto;">
+
+    <!-- TOP BAR -->
+    <div class="flex align-items-center justify-content-between gap-3 mb-3">
+      <p-button
+        icon="pi pi-arrow-left"
+        label="Back"
+        severity="secondary"
+        text
+        (onClick)="back()">
+      </p-button>
+
+      <div class="flex align-items-center gap-3">
+        <p-tag
+          [value]="booking()?.status"
+          [severity]="statusSeverity(booking()?.status)">
+        </p-tag>
+
+        @if (!editMode()) {
+        <p-button
+          icon="pi pi-pencil"
+          label="Edit"
+          severity="secondary"
+          rounded
+          (onClick)="toggleEdit()">
+        </p-button>
+        }
+
+        @if (editMode()) {
+        <p-button
+          icon="pi pi-save"
+          label="Save"
+          severity="primary"
+          rounded
+          [disabled]="saving()"
+          (onClick)="save()">
+        </p-button>
+
+        <p-button
+          icon="pi pi-times"
+          label="Cancel"
+          severity="secondary"
+          rounded
+          (onClick)="toggleEdit()">
+        </p-button>
+        }
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="mb-3">
+      <div class="text-900 text-3xl font-semibold">
+        {{ isNew() ? 'New Booking' : 'Booking #' + booking()?.id }}
+      </div>
+    </div>
+
+    <!-- DETAILS FORM -->
+    <p-card class="p-4 border-round-2xl shadow-1 surface-card">
+      <ng-template pTemplate="header">
+        <span class="font-semibold text-lg text-900">Details</span>
+      </ng-template>
+
+      <form [formGroup]="form" class="p-fluid grid mt-2">
+
+        <!-- Row 1 -->
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Select Property</label>
+            <p-select
+              [options]="propertyOptions"
+              formControlName="propertyId"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select a Property"
+              [filter]="true"
+              [loading]="loadingProperties"
+              class="w-full">
+            </p-select>
+          </div>
+        </div>
+
+        <div class="col-12 lg:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Status</label>
+            <p-select
+              [options]="bookingStatusOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              formControlName="status">
+            </p-select>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="col-12 lg:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Customer</label>
+            <div class="p-inputgroup flex w-full">
+              <p-select
+                [options]="customerOptions"
+                formControlName="customerId"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select Customer"
+                [filter]="true"
+                [disabled]="!editMode()"
+                [style]="{'flex': '1 1 auto'}"
+                styleClass="w-full">
+              </p-select>
+
+              <p-button
+                icon="pi pi-plus"
+                severity="secondary"
+                [disabled]="!editMode()"
+                (onClick)="openNewCustomerDialog()">
+              </p-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Check In</label>
+            <p-datepicker
+              formControlName="check_in_date"
+              [showIcon]="true"
+              [disabledDates]="disabledDates()"
+              [minDate]="minCheckInDate"
+              (onSelect)="updateCheckOutLimit($event)"
+              iconDisplay="input"
+              dateFormat="yy-mm-dd"
+              class="w-full">
+            </p-datepicker>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 lg:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Check Out</label>
+            <p-datepicker
+              formControlName="check_out_date"
+              [showIcon]="true"
+              [minDate]="minCheckOutDate"
+              [disabledDates]="disabledDates()"
+              iconDisplay="input"
+              dateFormat="yy-mm-dd"
+              class="w-full">
+            </p-datepicker>
+          </div>
+        </div>
+
+        <!-- Row 3  -->
+        <div class="col-12 md:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">No. of guests</label>
+            <p-inputNumber
+              formControlName="noOfGuests"
+              [min]="0"
+              [max]="30"
+              showButtons
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-3">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Total price</label>
+            <p-inputNumber
+              formControlName="totalPrice"
+              mode="currency"
+              currency="EUR"
+              [min]="0"
+              styleClass="w-full"
+              inputStyleClass="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm font-bold text-900">Auto Calculation</label>
+            <p-inputNumber
+              formControlName="totalPrice"
+              mode="currency"
+              currency="EUR"
+              [readonly]="true"
+              styleClass="w-full"
+              inputStyleClass="w-full bg-blue-50 font-bold">
+            </p-inputNumber>
+            <small class="text-600">
+              Auto-calculated: (Days × Guests × Rate)
+            </small>
+          </div>
+        </div>
+
+
+        <!-- &ndash; Row 4 &ndash;&gt;
+        <div class="col-12 lg:col-6">
+          <div class="flex flex-column gap-1">
+            <label class="text-sm text-600">Description</label>
+            <textarea pTextarea rows="5" autoResize formControlName="description" class="w-full"></textarea>
+          </div>
+        </div>
+
+        <div class="col-12 lg:col-6">
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-1">
+                <label class="text-sm text-600">Updated at (read-only)</label>
+                <input pInputText class="w-full" formControlName="updatedAt" />
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="flex flex-column gap-1">
+                <label class="text-sm text-600">Updated by (read-only)</label>
+                <input pInputText class="w-full" formControlName="updatedBy" />
+              </div>
+            </div>
+          </div>
+        </div>-->
+
+      </form>
+    </p-card>
+    <p-dialog
+      header="Create New Customer"
+      [(visible)]="showCustomerDialog"
+      [modal]="true"
+      [style]="{ width: '25rem' }">
+
+      <div class="flex flex-column gap-3 mt-2">
+        <div class="flex flex-column gap-1">
+          <label for="name">Full Name</label>
+          <input pInputText id="name" [(ngModel)]="newCustomer.full_name" autocomplete="off" />
+        </div>
+        <div class="flex flex-column gap-1">
+          <label for="email">Email</label>
+          <input pInputText id="email" [(ngModel)]="newCustomer.email" autocomplete="off" />
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <p-button label="Cancel" severity="secondary" (onClick)="showCustomerDialog = false" />
+        <p-button label="Save" [loading]="creatingCustomer" (onClick)="saveCustomer()" />
+      </ng-template>
+    </p-dialog>
+
+  </div>
+</div>

@@ -1,5 +1,10 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8001', // <-- tvoj backend URL
-  graphqlUrl: 'http://localhost:8001/graphql'
+  apiBaseUrl: 'https://hostflow.software/property',
+  paymentBaseUrl: 'http://localhost:8007',
+  graphqlUrl: 'https://hostflow.software/property/graphql',
+  bookingBaseUrl: 'https://hostflow.software/booking',
+  profileBaseUrl: 'https://hostflow.software/profile',
+  supabaseUrl: 'https://frauwrkbphmjngymcdyk.supabase.co',
+  supabaseKey: 'sb_publishable_bLW_Bhr4rlMs2zGjrke8wQ_EIoI2iDY'
 };
